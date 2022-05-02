@@ -9,19 +9,23 @@ function cleanup(effectFn) {
   }
   effectFn.deps.length = 0;
 }
-export function effect(fn, options = {}) {
+export function effect(fn, options: any = {}) {
   const effectFn = () => {
     // 清除副作用
     cleanup(effectFn);
     activeEffect = effectFn;
     effectStack.push(effectFn);
-    fn();
+    const res = fn();
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
+    return res;
   };
   effectFn.deps = [];
   effectFn.options = options;
-  effectFn();
+  if (!options.lazy) {
+    effectFn();
+  }
+  return effectFn;
 }
 export function track(target, key) {
   // objs(WeaKMap)->keys(Map)->effectFn(Set)
