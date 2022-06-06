@@ -4,8 +4,9 @@
 
 # todo
 
-- [ ] monorepo
-- [ ] vitest
-- [ ] effect
-- [ ] computed
-- [x] reactive
+- [x] monorepo
+- [x] vitest
+- [x] effect
+- [x] computed
+- [x] simple reactive
+- [ ] reactive array map set
