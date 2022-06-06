@@ -4,7 +4,7 @@
   "description": "a mini-vue wheel",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest packages/"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,8 @@
   "homepage": "https://github.com/szm8991/mini-vue#readme",
   "devDependencies": {
     "typescript": "^4.6.3",
+    "unbuild": "^0.7.4",
+    "vite": "^2.9.9",
     "vitest": "^0.8.1"
   }
 }

@@ -1,3 +1,3 @@
-export function add(a, b) {
-  return a + b;
-}
+export { effect } from './effect';
+export { reactive, isReactive, shallowReactive } from './reactive';
+export { computed } from './computed';

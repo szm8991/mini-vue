@@ -1,5 +1,7 @@
 # mini-vue
 
+- pnpm + ts + vitest + monorepo
+
 # todo
 
 1.monorepo
