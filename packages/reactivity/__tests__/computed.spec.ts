@@ -18,7 +18,7 @@ describe('computed', () => {
     expect(double.value).toBe(4);
     expect(fn).toHaveBeenCalledTimes(2);
   });
-  it('computed嵌套在effect中', () => {
+  it('computed with effect', () => {
     let data = { age: 10 };
     let obj = reactive(data);
     let fn = vi.fn(n => {});
