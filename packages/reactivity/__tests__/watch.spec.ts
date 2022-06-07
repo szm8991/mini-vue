@@ -72,13 +72,15 @@ describe('watch', () => {
   it('options watch object', async () => {
     let data = { age: 1 }
     let obj = reactive(data)
-    let finalData
     let expired = false
     watch(obj, async (newValue, oldValue, onInvalidate) => {
       onInvalidate(() => {
         expired = true
       })
       await sleep(1000)
+      if (!expired) {
+        // do something
+      }
     })
     obj.age++
     setTimeout(() => {

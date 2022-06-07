@@ -1,5 +1,5 @@
-import { reactive, isReactive, readonly, isProxy, isReadonly } from '../src/index'
-import { describe, it, expect } from 'vitest'
+import { reactive, isReactive, readonly, isProxy, isReadonly, effect } from '../src/index'
+import { describe, it, expect, vi } from 'vitest'
 describe('reactive', () => {
   it('retrun a reactive object', () => {
     const original = { name: 'xiaoming' }
@@ -18,20 +18,78 @@ describe('reactive', () => {
     expect(isReactive(observed.array)).toBe(true)
     expect(isReactive(observed.array[0])).toBe(true)
   })
-  // it('should make nested values readonly', () => {
-  //   const original = { foo: 1, bar: { baz: 2 } }
-  //   const wrapped = readonly(original)
-  //   expect(wrapped).not.toBe(original)
-  //   expect(isProxy(wrapped)).toBe(true)
-  //   expect(isReactive(wrapped)).toBe(false)
-  //   expect(isReadonly(wrapped)).toBe(true)
-  //   expect(isReactive(original)).toBe(false)
-  //   expect(isReadonly(original)).toBe(false)
-  //   expect(isReactive(wrapped.bar)).toBe(false)
-  //   expect(isReadonly(wrapped.bar)).toBe(true)
-  //   expect(isReactive(original.bar)).toBe(false)
-  //   expect(isReadonly(original.bar)).toBe(false)
-  //   // get
-  //   expect(wrapped.foo).toBe(1)
-  // })
+  it('delete property', () => {
+    const data = { name: 'xiaoming', age: 18 }
+    const obj = reactive(data)
+    let fn = vi.fn(arg => {})
+    effect(() => {
+      fn(obj.name)
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    delete obj.name
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+  it('has', () => {
+    const data = { name: 'xiaoming', age: 18 }
+    const obj = reactive(data)
+    let fn = vi.fn(arg => {})
+    effect(() => {
+      fn('name' in obj)
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenCalledWith(true)
+    delete obj.name
+    expect(fn).toHaveBeenCalledWith(false)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+  it('ownkeys', () => {
+    let obj = reactive({ name: 'xiaoming' })
+    let fn = vi.fn(arg => {})
+    effect(() => {
+      fn(Object.keys(obj))
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenCalledWith(['name'])
+    obj.age = 1
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(fn).toHaveBeenCalledWith(['name', 'age'])
+  })
+  it('for in', () => {
+    let obj = reactive({ name: 'xiaoming' })
+    let fn = vi.fn(() => {})
+    effect(() => {
+      for (const key in obj) {
+        fn()
+      }
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    obj.name = 'xiaoxiaoming'
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+  it('oldVal equal newVal', () => {
+    let obj = reactive({ age: 1 })
+    let fn = vi.fn(arg1 => {})
+    effect(() => {
+      fn(obj.age)
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    obj.age = 1
+    expect(fn).toHaveBeenCalledTimes(1)
+    obj.age = 2
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+  it('prototype raw', () => {
+    let obj = {}
+    let proto = { age: 1 }
+    let child = reactive(obj)
+    let parent = reactive(proto)
+    Object.setPrototypeOf(child, parent)
+    let fn = vi.fn(arg1 => {})
+    effect(() => {
+      fn(child.age)
+    })
+    expect(fn).toHaveBeenCalledTimes(1)
+    child.age = 2
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
 })
