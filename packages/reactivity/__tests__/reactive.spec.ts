@@ -1,4 +1,4 @@
-import { reactive, isReactive, readonly, isProxy, isReadonly, effect } from '../src/index'
+import { reactive, isReactive, effect } from '../src/index'
 import { describe, it, expect, vi } from 'vitest'
 describe('reactive', () => {
   it('retrun a reactive object', () => {
