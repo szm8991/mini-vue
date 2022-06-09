@@ -1,6 +1,7 @@
 import { ITERATE_KEY } from './baseHanlders'
 import { initDepMarkers, finalizeDepMarkers, createDep, newTracked, wasTracked } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
+import { EffectScope, recordEffectScope } from './effectScope'
 let activeEffect: effectFnType | undefined
 let shouldTrack = true
 export function stopTrack() {
@@ -32,6 +33,7 @@ interface EffectOption {
   lazy?: boolean
   immediate?: boolean
   scheduler?: (...args: any[]) => void
+  scope?: EffectScope
 }
 export function effect<T>(fn: () => T, options: EffectOption = {}) {
   const effectFn = () => {
@@ -78,6 +80,8 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
       deps.length = 0
     }
   }
+  // 记录在effectScope中
+  recordEffectScope(effectFn)
   return effectFn
 }
 export function track(target, key, type: TrackOpTypes = TrackOpTypes.Default) {
