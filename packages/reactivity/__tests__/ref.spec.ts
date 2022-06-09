@@ -1,0 +1,49 @@
+import { ref, isRef, unRef, effect, isReactive, reactive } from '../src'
+import { describe, it, expect, vi } from 'vitest'
+
+describe('ref', () => {
+  it('simple ref', () => {
+    const r1 = ref(0)
+    const r2 = ref(r1)
+    expect(r1).toBe(r2)
+    const user = reactive({
+      age: 1,
+    })
+    expect(isRef(r1)).toBe(true)
+    expect(isRef(1)).toBe(false)
+    expect(isRef(user)).toBe(false)
+  })
+  it('unRef', () => {
+    const a = ref(1)
+    expect(unRef(a)).toBe(1)
+    expect(unRef(1)).toBe(1)
+  })
+  it('ref effect', () => {
+    const r = ref(0)
+    let val
+    let calls = 0
+    effect(() => {
+      calls++
+      val = r.value
+    })
+    expect(calls).toBe(1)
+    expect(val).toBe(0)
+    r.value++
+    expect(calls).toBe(2)
+    expect(val).toBe(1)
+    r.value = 1
+    expect(calls).toBe(2)
+    expect(val).toBe(1)
+  })
+  it('ref reactive effect', () => {
+    const r = ref({ name: 'xiaoming' })
+    let val
+    effect(() => {
+      val = r.value.name
+    })
+    expect(val).toBe('xiaoming')
+    expect(isReactive(r.value)).toBe(true)
+    r.value.name = 'xiaoxiaoming'
+    expect(val).toBe('xiaoxiaoming')
+  })
+})

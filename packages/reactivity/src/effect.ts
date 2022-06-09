@@ -9,6 +9,9 @@ export function stopTrack() {
 export function startTrack() {
   shouldTrack = true
 }
+export function isTracking() {
+  return shouldTrack && activeEffect !== undefined
+}
 let bucket = new WeakMap()
 // 用于存储嵌套的effect
 const effectStack: any[] = []
@@ -77,7 +80,7 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
   }
   return effectFn
 }
-export function track(target, key, type: TrackOpTypes) {
+export function track(target, key, type: TrackOpTypes = TrackOpTypes.Default) {
   if (!activeEffect || !shouldTrack) return
   // objs(WeaKMap)->keys(Map)->effectFn(Set)
   let depsMap = bucket.get(target)
@@ -113,7 +116,7 @@ function trackEffects(deps) {
   }
 }
 
-export function trigger(target, key, type: TriggerOpTypes) {
+export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Default) {
   let depsMap = bucket.get(target)
   if (!depsMap) return
   let deps = depsMap.get(key)
