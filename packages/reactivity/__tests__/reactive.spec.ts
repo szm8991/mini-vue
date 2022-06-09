@@ -6,6 +6,12 @@ describe('reactive', () => {
     const observed = reactive(original)
     expect(observed).not.toBe(original)
   })
+  it('reactive map', () => {
+    const original = { name: 'xiaoming' }
+    const observed1 = reactive(original)
+    const observed2 = reactive(original)
+    expect(observed1).toBe(observed2)
+  })
   it('nested reactive', () => {
     const original = {
       nested: {

@@ -1,4 +1,5 @@
-import { track, trigger } from './effect'
+import { startTrack, stopTrack, track, trigger } from './effect'
+import { hasOwn } from '../../shared'
 import {
   reactive,
   readonly,
@@ -8,6 +9,29 @@ import {
   readonlyMap,
 } from './reactive'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
+const arrayInstrumentations = {}
+;['push', 'pop', 'shift', 'unshift'].forEach(method => {
+  const originMethod = Array.prototype[method]
+  arrayInstrumentations[method] = function (...args) {
+    stopTrack()
+    const res = originMethod.apply(this, args)
+    startTrack()
+    return res
+  }
+})
+;['includes', 'indexOf', 'lastIndexOf'].forEach(method => {
+  const originMethod = Array.prototype[method]
+  arrayInstrumentations[method] = function (...args) {
+    // this 是代理对象，先在代理对象中查找，将结果存储到 res 中
+    let res = originMethod.apply(this, args)
+    if (res === false) {
+      // res 为 false 说明没找到，在通过 this.raw 拿到原始数组，再去原始数组中查找，并更新 res 值
+      res = originMethod.apply(this[ReactiveFlags.RAW], args)
+    }
+    // 返回最终的结果
+    return res
+  }
+})
 const get = createGetter()
 const set = createSetter()
 const shallowReactiveGet = createGetter(true)
@@ -16,11 +40,14 @@ const shallowReadonlyGet = createGetter(true, true)
 function createGetter(isShallow: boolean = false, isReadonly: boolean = false) {
   return function get(target, key, receiver) {
     // 是不是已经存在map中，避免重复创建
-    // const isExistMap = () =>
-    //   key === ReactiveFlags.RAW &&
-    //   (receiver === reactiveMap.get(target) ||
-    //     receiver === shallowReactiveMap.get(target) ||
-    //     receiver === readonlyMap.get(target))
+    const isExistMap = () =>
+      key === ReactiveFlags.RAW &&
+      (receiver === reactiveMap.get(target) ||
+        receiver === shallowReactiveMap.get(target) ||
+        receiver === readonlyMap.get(target))
+    if (isExistMap()) {
+      return target
+    }
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
@@ -30,12 +57,12 @@ function createGetter(isShallow: boolean = false, isReadonly: boolean = false) {
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
-    // if (isExistMap()) {
-    //   return target
-    // }
+
+    if (Array.isArray(target) && hasOwn(arrayInstrumentations, key))
+      return Reflect.get(arrayInstrumentations, key, receiver)
     // 解决getter访问时this指向target而不是代理对象的问题
     const res = Reflect.get(target, key, receiver)
-    if (!isReadonly) {
+    if (!isReadonly && typeof key != 'symbol') {
       track(target, key, TrackOpTypes.GET)
     }
     if (isShallow) {
@@ -55,13 +82,17 @@ function createSetter(isShallow: boolean = false, isReadonly: boolean = false) {
       return true
     }
     const oldValue = target[key]
-    const type = Object.prototype.hasOwnProperty.call(target, key)
+    const type = Array.isArray(target)
+      ? Number(key) < target.length
+        ? TriggerOpTypes.SET
+        : TriggerOpTypes.ADD // 越界标记为add
+      : hasOwn(target, key)
       ? TriggerOpTypes.SET
       : TriggerOpTypes.ADD
     const res = Reflect.set(target, key, newValue, receiver)
     if (target === receiver[ReactiveFlags.RAW]) {
       // if(oldValue !== newValue && (oldValue === oldValue || newValue === newValue))
-      if (!Object.is(oldValue, newValue)) trigger(target, key, type)
+      if (!Object.is(oldValue, newValue)) trigger(target, key, type, newValue)
     }
     return res
   }

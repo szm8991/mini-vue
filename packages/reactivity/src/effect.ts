@@ -120,7 +120,7 @@ function trackEffects(deps) {
   }
 }
 
-export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Default) {
+export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Default, newVal?) {
   let depsMap = bucket.get(target)
   if (!depsMap) return
   let deps = depsMap.get(key)
@@ -136,6 +136,22 @@ export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Defau
       itrateDeps.forEach(effectFn => {
         if (effectFn !== activeEffect) effectToRun.add(effectFn)
       })
+  }
+  if (type === TriggerOpTypes.ADD && Array.isArray(target)) {
+    const lengthEffects = depsMap.get('length')
+    lengthEffects &&
+      lengthEffects.forEach(effectFn => {
+        if (effectFn !== activeEffect) effectToRun.add(effectFn)
+      })
+  }
+  if (Array.isArray(target) && key === 'length') {
+    depsMap.forEach((effects, key) => {
+      if (key >= newVal) {
+        effects.forEach(effectFn => {
+          if (effectFn !== activeEffect) effectToRun.add(effectFn)
+        })
+      }
+    })
   }
   effectToRun.forEach((effectFn: any) => {
     if (effectFn.options.scheduler) {

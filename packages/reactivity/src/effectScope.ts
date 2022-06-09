@@ -16,7 +16,7 @@ export class EffectScope {
   index: number | undefined
   constructor() {
     if (activeEffectScope) {
-      console.log('has parent scope')
+      // console.log('has parent scope')
       this.parent = activeEffectScope
       // 记住在父级中的位置
       this.index = (activeEffectScope.scopes || (activeEffectScope.scopes = [])).push(this) - 1

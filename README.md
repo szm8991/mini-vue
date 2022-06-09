@@ -10,4 +10,5 @@
 - [x] computed
 - [x] watch
 - [x] simple reactive
-- [ ] reactive array map set
+- [x] reactive array
+- [ ] reactive collection(map、set)
