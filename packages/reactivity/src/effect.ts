@@ -1,4 +1,5 @@
 import { ITERATE_KEY } from './baseHanlders'
+import { MAP_KEY_ITERATE_KEY } from './collectionHandlers'
 import { initDepMarkers, finalizeDepMarkers, createDep, newTracked, wasTracked } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 import { EffectScope, recordEffectScope } from './effectScope'
@@ -130,8 +131,22 @@ export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Defau
       // 避免无限递归
       if (effectFn !== activeEffect) effectToRun.add(effectFn)
     })
-  if (type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE) {
+  if (
+    type === TriggerOpTypes.ADD ||
+    type === TriggerOpTypes.DELETE ||
+    (type === TriggerOpTypes.SET && Object.prototype.toString.call(target) == '[object Map]')
+  ) {
     const itrateDeps = depsMap.get(ITERATE_KEY)
+    itrateDeps &&
+      itrateDeps.forEach(effectFn => {
+        if (effectFn !== activeEffect) effectToRun.add(effectFn)
+      })
+  }
+  if (
+    (type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE) &&
+    Object.prototype.toString.call(target) == '[object Map]'
+  ) {
+    const itrateDeps = depsMap.get(MAP_KEY_ITERATE_KEY)
     itrateDeps &&
       itrateDeps.forEach(effectFn => {
         if (effectFn !== activeEffect) effectToRun.add(effectFn)

@@ -4,6 +4,8 @@ import {
   readonlyHandlers,
   shallowReadonlyHandlers,
 } from './baseHanlders'
+import { toRawType } from '../../shared'
+import { collectionHandlers } from './collectionHandlers'
 export const reactiveMap = new WeakMap()
 export const shallowReactiveMap = new WeakMap()
 export const readonlyMap = new WeakMap()
@@ -14,8 +16,31 @@ export const enum ReactiveFlags {
   IS_SHALLOW = '__v_isShallow',
   RAW = '__v_raw',
 }
+const enum TargetType {
+  INVALID = 0,
+  COMMON = 1,
+  COLLECTION = 2,
+}
+function targetTypeMap(rawType: string) {
+  switch (rawType) {
+    case 'Object':
+    case 'Array':
+      return TargetType.COMMON
+    case 'Map':
+    case 'Set':
+    case 'WeakMap':
+    case 'WeakSet':
+      return TargetType.COLLECTION
+    default:
+      return TargetType.INVALID
+  }
+}
+function getTargetType(value: any) {
+  return targetTypeMap(toRawType(value))
+}
 export function reactive(target: Object) {
-  return createReactiveObject(target, reactiveMap, mutableHandlers)
+  const handers = getTargetType(target) === TargetType.COMMON ? mutableHandlers : collectionHandlers
+  return createReactiveObject(target, reactiveMap, handers)
 }
 export function shallowReactive(target: object) {
   return createReactiveObject(target, shallowReactiveMap, shallowReactiveHandlers)
