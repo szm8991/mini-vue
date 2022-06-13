@@ -14,6 +14,12 @@ importers:
       vite: registry.npmmirror.com/vite/2.9.9
       vitest: registry.npmmirror.com/vitest/0.8.1
 
+  packages/compiler:
+    specifiers:
+      '@ming/shared': workspace:^1.0.0
+    dependencies:
+      '@ming/shared': link:../shared
+
   packages/reactivity:
     specifiers:
       '@ming/shared': workspace:*
