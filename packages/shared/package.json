@@ -1,27 +1,22 @@
 {
-  "name": "@ming/reactive",
+  "name": "@ming/shared",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "vitest",
     "build": "unbuild",
     "lint": "eslint src --fix",
     "release": "npx bumpp --commit --push --tag"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@ming/shared": "workspace:*"
-  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

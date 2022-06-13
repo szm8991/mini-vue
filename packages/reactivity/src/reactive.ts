@@ -4,7 +4,7 @@ import {
   readonlyHandlers,
   shallowReadonlyHandlers,
 } from './baseHanlders'
-import { toRawType } from '../../shared'
+import { toRawType } from '@ming/shared'
 import { collectionHandlers } from './collectionHandlers'
 export const reactiveMap = new WeakMap()
 export const shallowReactiveMap = new WeakMap()

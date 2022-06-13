@@ -1,6 +1,6 @@
 import { track, trigger } from './effect'
 import { reactive } from './reactive'
-import { isObject } from '../../shared'
+import { isObject } from '@ming/shared'
 function convert(val) {
   return isObject(val) ? reactive(val) : val
 }

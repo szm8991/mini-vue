@@ -15,6 +15,12 @@ importers:
       vitest: registry.npmmirror.com/vitest/0.8.1
 
   packages/reactivity:
+    specifiers:
+      '@ming/shared': workspace:*
+    dependencies:
+      '@ming/shared': link:../shared
+
+  packages/shared:
     specifiers: {}
 
 packages:

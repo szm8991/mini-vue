@@ -1,5 +1,5 @@
 import { startTrack, stopTrack, track, trigger } from './effect'
-import { hasOwn } from '../../shared'
+import { hasOwn } from '@ming/shared'
 import {
   reactive,
   readonly,
