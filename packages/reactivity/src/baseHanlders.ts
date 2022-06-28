@@ -92,6 +92,7 @@ function createSetter(isShallow: boolean = false, isReadonly: boolean = false) {
     const res = Reflect.set(target, key, newValue, receiver)
     if (target === receiver[ReactiveFlags.RAW]) {
       // if(oldValue !== newValue && (oldValue === oldValue || newValue === newValue))
+      // 判断新老值是否一样，如果不一样，则触发trigger
       if (!Object.is(oldValue, newValue)) trigger(target, key, type, newValue)
     }
     return res

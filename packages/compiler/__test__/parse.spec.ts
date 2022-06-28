@@ -1,4 +1,4 @@
-import { parse } from '../src'
+import { parse, dump, transform } from '../src'
 import { describe, it, expect } from 'vitest'
 describe('tokenzie', () => {
   it('parse <div><p>Vue</p><p>Template</p></div>', () => {
@@ -36,5 +36,13 @@ describe('tokenzie', () => {
         "type": "Root",
       }
     `)
+  })
+  it('test dump output', () => {
+    const ast = parse('<div><p>Vue</p><p>Template</p></div>')
+    dump(ast)
+  })
+  it('test transform output', () => {
+    const ast = parse('<div><p>Vue</p><p>Template</p></div>')
+    transform(ast)
   })
 })
