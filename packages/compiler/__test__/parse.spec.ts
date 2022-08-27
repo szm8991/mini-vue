@@ -39,10 +39,12 @@ describe('tokenzie', () => {
   })
   it('test dump output', () => {
     const ast = parse('<div><p>Vue</p><p>Template</p></div>')
+    console.log('origin')
     dump(ast)
   })
   it('test transform output', () => {
     const ast = parse('<div><p>Vue</p><p>Template</p></div>')
+    console.log('transform')
     transform(ast)
   })
 })

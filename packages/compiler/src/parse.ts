@@ -49,13 +49,14 @@ export function dump(node: NodeType, indent: number = 0) {
     node.children.forEach(n => dump(n, indent + 2))
   }
 }
-// 遍历ast，深度优先遍历
-function traverseNode(ast: NodeType, context) {
-  const currentNode = ast
+// 遍历ast，方便进行后续transform，深度优先遍历
+function traverseNode(ast: NodeType, context: TransformContext) {
+  context.currentNode = ast
   // 对当前ast做一些转换工作
   const transforms = context.nodeTransforms
   for (let i = 0; i < transforms.length; i++) {
-    transforms[i](currentNode, context)
+    transforms[i](context.currentNode, context)
+    if (!context.currentNode) return
   }
   // 递归处理子节点
   const children = ast.children
@@ -73,6 +74,7 @@ export type TransformContext = {
   parent: NodeType | null
   replaceNode: (node: NodeType) => void
   nodeTransforms: Function[]
+  removeNode: () => void
 }
 export function transform(ast: NodeType) {
   const context: TransformContext = {
@@ -80,8 +82,14 @@ export function transform(ast: NodeType) {
     childIdx: 0,
     parent: null,
     replaceNode(node: NodeType) {
-      context.parent!.children![context.childIdx] = node
       context.currentNode = node
+      context.parent!.children![context.childIdx] = node
+    },
+    removeNode() {
+      if (context.parent) {
+        context.parent.children?.splice(context.childIdx, 1)
+        context.currentNode = null
+      }
     },
     nodeTransforms: [transformElement, transformText],
   }
@@ -95,9 +103,10 @@ function transformElement(node: NodeType) {
 }
 function transformText(node: NodeType, context: TransformContext) {
   if (node.type === 'Text') {
-    context.replaceNode({
-      type: 'Element',
-      tag: 'span',
-    })
+    context.removeNode()
+    // context.replaceNode({
+    //   type: 'Element',
+    //   tag: 'span',
+    // })
   }
 }
