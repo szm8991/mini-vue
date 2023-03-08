@@ -49,6 +49,16 @@ importers:
   packages/shared:
     specifiers: {}
 
+  packages/vue:
+    specifiers:
+      '@ming/compiler': workspace:^1.0.0
+      '@ming/runtime-dom': workspace:^1.0.0
+      '@ming/shared': workspace:^1.0.0
+    dependencies:
+      '@ming/compiler': link:../compiler
+      '@ming/runtime-dom': link:../runtime-dom
+      '@ming/shared': link:../shared
+
 packages:
 
   registry.npmmirror.com/@ampproject/remapping/2.2.0:

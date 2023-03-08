@@ -7,7 +7,8 @@
   "scripts": {
     "test": "vitest packages/",
     "lint": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts",
-    "lint:fix": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts --fix"
+    "lint:fix": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts --fix",
+    "build": "unbuild"
   },
   "repository": {
     "type": "git",

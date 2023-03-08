@@ -20,9 +20,9 @@
   "author": "xiaoming",
   "license": "ISC",
   "dependencies": {
-    "@ming/compiler": "workspace:^1.0.0",
-    "@ming/runtime-dom": "workspace:^1.0.0",
-    "@ming/shared": "workspace:^1.0.0"
+    "@ming/compiler": "workspace:*",
+    "@ming/runtime-dom": "workspace:*",
+    "@ming/shared": "workspace:*"
   },
   "devDependencies": {}
 }
