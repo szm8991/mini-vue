@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { isProxy, isReactive, isReadonly, readonly } from '../src/index'
 describe('readonly', () => {
   it('should make nested values readonly', () => {
@@ -14,7 +14,9 @@ describe('readonly', () => {
     expect(isReadonly(wrapped.bar)).toBe(true)
     expect(isReactive(original.bar)).toBe(false)
     expect(isReadonly(original.bar)).toBe(false)
-    // get
+    console.warn = vi.fn()
+    wrapped.foo = 2
+    expect(console.warn).toBeCalled()
     expect(wrapped.foo).toBe(1)
   })
 })

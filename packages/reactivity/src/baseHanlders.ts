@@ -1,10 +1,7 @@
 import { hasOwn } from '@ming/shared'
 import { startTrack, stopTrack, track, trigger } from './effect'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
-import {
-  ReactiveFlags, reactive,
-  reactiveMap, readonly, readonlyMap, shallowReactiveMap,
-} from './reactive'
+import { ReactiveFlags, reactive, reactiveMap, readonly, readonlyMap, shallowReactiveMap } from './reactive'
 const arrayInstrumentations = {}
 ;['push', 'pop', 'shift', 'unshift'].forEach((method) => {
   const originMethod = Array.prototype[method]
@@ -30,8 +27,11 @@ const arrayInstrumentations = {}
 })
 const get = createGetter()
 const set = createSetter()
-const shallowReactiveGet = createGetter(true)
+const readonlyReactiveSet = createSetter(false, true)
+const shallowReactiveSet = createSetter(true)
+const shallowReadonlySet = createGetter(true, true)
 const readonlyReactiveGet = createGetter(false, true)
+const shallowReactiveGet = createGetter(true)
 const shallowReadonlyGet = createGetter(true, true)
 function createGetter(isShallow = false, isReadonly = false) {
   return function get(target, key, receiver) {
@@ -126,21 +126,21 @@ export const mutableHandlers = {
 }
 export const shallowReactiveHandlers = {
   get: shallowReactiveGet,
-  set,
+  set: shallowReactiveSet,
   deleteProperty,
   has,
   ownKeys,
 }
 export const readonlyHandlers = {
   get: readonlyReactiveGet,
-  set,
+  set: readonlyReactiveSet,
   deleteProperty,
   has,
   ownKeys,
 }
 export const shallowReadonlyHandlers = {
   get: shallowReadonlyGet,
-  set,
+  set: shallowReadonlySet,
   deleteProperty,
   has,
   ownKeys,
