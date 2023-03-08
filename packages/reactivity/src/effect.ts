@@ -41,6 +41,7 @@ interface EffectOption {
 export function effect<T>(fn: () => T, options: EffectOption = {}) {
   const effectFn = () => {
     let res
+    const lastShouldTrack = shouldTrack
     try {
       // 清除副作用，实现分支切换
       // cleanup(effectFn);
@@ -68,21 +69,25 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
       trackOpBit = 1 << --effectTrackDepth
       effectStack.pop()
       activeEffect = effectStack[effectStack.length - 1]
+      shouldTrack = lastShouldTrack
     }
     return res
   }
   effectFn.deps = []
   effectFn.options = options
+  effectFn.active = true
   if (!options.lazy)
     effectFn()
 
   effectFn.stop = function () {
+    const { deps, active } = effectFn
+    if (!active)
+      return fn()
+    effectFn.active = false
     options.onStop && options.onStop()
-    const { deps } = effectFn
     if (deps.length) {
       for (let i = 0; i < deps.length; i++)
         deps[i].delete(effectFn)
-
       deps.length = 0
     }
   }
@@ -107,6 +112,7 @@ export function track(target, key, type: TrackOpTypes = TrackOpTypes.Default) {
   trackEffects(deps)
 }
 function trackEffects(deps) {
+  // 避免自增等先访问后赋值的操作重新触发依赖收集过程
   let shouldTrack = false
   if (effectTrackDepth <= maxMarkerBits) {
     if (!newTracked(deps)) {

@@ -211,18 +211,24 @@ describe('effect', () => {
   it('stop effect', () => {
     const data = reactive({
       name: 'xiaoming',
+      age: 1,
     })
     const fn = vi.fn((...args) => {})
     const effectFn = effect(() => {
-      fn(data.name)
+      fn(data.name, data.age)
     })
     data.name = 'xiaoxiaoming'
     expect(fn).toHaveBeenCalledTimes(2)
+    data.age++
+    expect(fn).toHaveBeenCalledTimes(3)
     effectFn.stop()
     data.name = 'xiaoming'
-    expect(fn).toHaveBeenCalledTimes(2)
-    effectFn()
     expect(fn).toHaveBeenCalledTimes(3)
+    data.age--
+    data.age = 2
+    expect(fn).toHaveBeenCalledTimes(3)
+    effectFn()
+    expect(fn).toHaveBeenCalledTimes(4)
   })
   it('events: onStop', () => {
     const onStop = vi.fn()
