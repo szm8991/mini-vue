@@ -1,10 +1,7 @@
-import {
-  mutableHandlers,
-  shallowReactiveHandlers,
-  readonlyHandlers,
-  shallowReadonlyHandlers,
-} from './baseHanlders'
 import { toRawType } from '@ming/shared'
+import {
+  mutableHandlers, readonlyHandlers, shallowReactiveHandlers, shallowReadonlyHandlers,
+} from './baseHanlders'
 import { collectionHandlers } from './collectionHandlers'
 export const reactiveMap = new WeakMap()
 export const shallowReactiveMap = new WeakMap()
@@ -65,7 +62,8 @@ export function isShallow(value) {
 }
 function createReactiveObject(target, proxyMap, baseHandlers) {
   const existingProxy = proxyMap.get(target)
-  if (existingProxy) return existingProxy
+  if (existingProxy)
+    return existingProxy
   const proxy = new Proxy(target, baseHandlers)
   // 缓存多次代理相同对象
   proxyMap.set(target, proxy)

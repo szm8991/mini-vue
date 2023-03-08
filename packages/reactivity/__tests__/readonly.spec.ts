@@ -1,5 +1,5 @@
-import { readonly, isReadonly, isProxy, isReactive } from '../src/index'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { isProxy, isReactive, isReadonly, readonly } from '../src/index'
 describe('readonly', () => {
   it('should make nested values readonly', () => {
     const original = { foo: 1, bar: { baz: 2 } }

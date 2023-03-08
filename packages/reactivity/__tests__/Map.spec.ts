@@ -1,11 +1,11 @@
-import { reactive, effect } from '../src/index'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { effect, reactive } from '../src/index'
 describe('effect map', () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
   it('test map', () => {
-    let map = reactive(new Map([['a', 1]]))
+    const map = reactive(new Map([['a', 1]]))
     let val
     effect(() => {
       val = map.size
@@ -41,7 +41,7 @@ describe('effect map', () => {
     const map = reactive(new Map())
     effect(() => {
       dummy = 0
-      for (let [key, num] of map) {
+      for (const [key, num] of map) {
         key
         dummy += num
       }
@@ -61,9 +61,8 @@ describe('effect map', () => {
     const map = reactive(new Map())
     effect(() => {
       dummy = 0
-      for (let key of map.keys()) {
+      for (const key of map.keys())
         dummy += key
-      }
     })
     expect(dummy).toBe(0)
     map.set(3, 3)
@@ -79,9 +78,8 @@ describe('effect map', () => {
     const map = reactive(new Map())
     effect(() => {
       dummy = 0
-      for (let num of map.values()) {
+      for (const num of map.values())
         dummy += num
-      }
     })
 
     expect(dummy).toBe(0)
@@ -102,8 +100,8 @@ describe('effect map', () => {
     effect(() => {
       dummy = ''
       dummy2 = 0
-      // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of map.entries()) {
+
+      for (const [key, num] of map.entries()) {
         dummy += key
         dummy2 += num
       }

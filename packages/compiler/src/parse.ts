@@ -1,5 +1,5 @@
 import { tokenzie } from './tokenzie'
-export type NodeType = {
+export interface NodeType {
   type: string
   tag?: string | undefined
   content?: string | undefined
@@ -41,13 +41,12 @@ export function parse(str) {
   return root
 }
 // 辅助函数，查看ast结构，深度优先遍历
-export function dump(node: NodeType, indent: number = 0) {
+export function dump(node: NodeType, indent = 0) {
   const type = node.type
   const desc = node.type === 'Root' ? '' : node.type === 'Element' ? node.tag : node.content
   console.log(`${'-'.repeat(indent)}${type}: ${desc}`)
-  if (node.children) {
+  if (node.children)
     node.children.forEach(n => dump(n, indent + 2))
-  }
 }
 // 遍历ast，方便进行后续transform，深度优先遍历
 function traverseNode(ast: NodeType, context: TransformContext) {
@@ -58,8 +57,10 @@ function traverseNode(ast: NodeType, context: TransformContext) {
   const transforms = context.nodeTransforms
   for (let i = 0; i < transforms.length; i++) {
     const onExit = transforms[i](context.currentNode, context)
-    if (onExit) exitFns.push(onExit)
-    if (!context.currentNode) return
+    if (onExit)
+      exitFns.push(onExit)
+    if (!context.currentNode)
+      return
   }
   // 递归处理子节点
   const children = context.currentNode.children
@@ -71,11 +72,10 @@ function traverseNode(ast: NodeType, context: TransformContext) {
     }
   }
   let i = exitFns.length
-  while (i--) {
+  while (i--)
     exitFns[i]()
-  }
 }
-export type TransformContext = {
+export interface TransformContext {
   currentNode: NodeType | null
   childIdx: number
   parent: NodeType | null
@@ -100,9 +100,8 @@ export function transform(ast: NodeType) {
       }
     },
     addNode(node: NodeType) {
-      if (context.parent) {
+      if (context.parent)
         context.parent.children?.push(node)
-      }
     },
     nodeTransforms: [transformElement, transformText],
   }
@@ -133,9 +132,8 @@ export function dumpEnterandExit(ast: NodeType = { type: 'Root', children: [] })
   traverseNode(ast, context)
 }
 function transformElement(node: NodeType): void | (() => void) {
-  if (node.type === 'Element' && node.tag === 'p') {
+  if (node.type === 'Element' && node.tag === 'p')
     node.tag = 'h1'
-  }
 }
 function transformText(node: NodeType, context: TransformContext): void | (() => void) {
   if (node.type === 'Text') {

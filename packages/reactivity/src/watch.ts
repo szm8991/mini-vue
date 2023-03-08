@@ -6,7 +6,8 @@ interface watchOptions {
 }
 export function watch(source, cb, options: watchOptions = {}) {
   let getter
-  if (typeof source === 'function') getter = source
+  if (typeof source === 'function')
+    getter = source
   else getter = () => traverse(source)
   let oldValue, newValue
   // 存储过期回调
@@ -15,8 +16,10 @@ export function watch(source, cb, options: watchOptions = {}) {
     cleanup = fn
   }
   const job = () => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     newValue = effectFn()
-    if (cleanup) cleanup()
+    if (cleanup)
+      cleanup()
     cb(newValue, oldValue, onInvalidate)
     oldValue = newValue
   }
@@ -28,19 +31,22 @@ export function watch(source, cb, options: watchOptions = {}) {
         // 异步队列执行
         const p = Promise.resolve()
         p.then(job)
-      } else {
+      }
+      else {
         job()
       }
     },
   })
-  if (options.immediate) job()
+  if (options.immediate)
+    job()
   else oldValue = effectFn()
 }
 function traverse(value, seen = new Set()) {
-  if (typeof value !== 'object' || value === null || seen.has(value)) return
+  if (typeof value !== 'object' || value === null || seen.has(value))
+    return
   seen.add(value)
-  for (const k in value) {
+  for (const k in value)
     traverse(value[k], seen)
-  }
+
   return value
 }

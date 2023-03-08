@@ -6,7 +6,7 @@ const enum State {
   tagEnd = 5, // 结束标签状态
   tagEndName = 6, // 结束标签名称状态
 }
-export type MyToken = {
+export interface MyToken {
   type: string
   content?: string
   name?: string
@@ -19,9 +19,9 @@ function isAlpha(char: string) {
 export function tokenzie(str: string) {
   // 状态机当前状态
   let currengState = State.initial
-  //用于缓存字符
+  // 用于缓存字符
   const chars: string[] = []
-  //生成的 Token会存储到tokens数组中，并作为函数的返回值返回
+  // 生成的 Token会存储到tokens数组中，并作为函数的返回值返回
   const tokens: MyToken[] = []
   while (str) {
     // 查看第一个字符
@@ -32,7 +32,8 @@ export function tokenzie(str: string) {
           // 切换状态并消费字符
           currengState = State.tagOpen
           str = str.slice(1)
-        } else if (isAlpha(char)) {
+        }
+        else if (isAlpha(char)) {
           currengState = State.text
           chars.push(char)
           str = str.slice(1)
@@ -44,7 +45,8 @@ export function tokenzie(str: string) {
           currengState = State.tagName
           chars.push(char)
           str = str.slice(1)
-        } else if (char === '/') {
+        }
+        else if (char === '/') {
           currengState = State.tagEnd
           str = str.slice(1)
         }
@@ -53,7 +55,8 @@ export function tokenzie(str: string) {
         if (isAlpha(char)) {
           chars.push(char)
           str = str.slice(1)
-        } else if (char === '>') {
+        }
+        else if (char === '>') {
           currengState = State.initial
           tokens.push({
             type: 'tag',
@@ -67,7 +70,8 @@ export function tokenzie(str: string) {
         if (isAlpha(char)) {
           chars.push(char)
           str = str.slice(1)
-        } else if (char === '<') {
+        }
+        else if (char === '<') {
           currengState = State.tagOpen
           tokens.push({
             type: 'text',
@@ -88,7 +92,8 @@ export function tokenzie(str: string) {
         if (isAlpha(char)) {
           chars.push(char)
           str = str.slice(1)
-        } else if (char === '>') {
+        }
+        else if (char === '>') {
           currengState = State.initial
           tokens.push({
             type: 'tagEnd',

@@ -1,8 +1,9 @@
 import { ITERATE_KEY } from './baseHanlders'
 import { MAP_KEY_ITERATE_KEY } from './collectionHandlers'
-import { initDepMarkers, finalizeDepMarkers, createDep, newTracked, wasTracked } from './dep'
+import { createDep, finalizeDepMarkers, initDepMarkers, newTracked, wasTracked } from './dep'
+import type { EffectScope } from './effectScope'
+import { recordEffectScope } from './effectScope'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
-import { EffectScope, recordEffectScope } from './effectScope'
 let activeEffect: effectFnType | undefined
 let shouldTrack = true
 export function stopTrack() {
@@ -14,7 +15,7 @@ export function startTrack() {
 export function isTracking() {
   return shouldTrack && activeEffect !== undefined
 }
-let bucket = new WeakMap()
+const bucket = new WeakMap()
 // 用于存储嵌套的effect
 const effectStack: any[] = []
 export type effectFnType = ReturnType<typeof effect>
@@ -25,9 +26,9 @@ export let trackOpBit = 1
 // 最大标记的位数，超过这个js，恢复全部clean的逻辑 数字太大可能溢出
 const maxMarkerBits = 30
 function cleanup(effectFn: effectFnType) {
-  for (let i = 0; i < effectFn.deps.length; i++) {
+  for (let i = 0; i < effectFn.deps.length; i++)
     effectFn.deps[i].delete(effectFn)
-  }
+
   effectFn.deps.length = 0
 }
 interface EffectOption {
@@ -51,12 +52,14 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
       if (effectTrackDepth <= maxMarkerBits) {
         // 给以前的依赖打标记——w
         initDepMarkers(effectFn)
-      } else {
+      }
+      else {
         cleanup(effectFn)
       }
       // fn执行时会走到track
       res = fn()
-    } finally {
+    }
+    finally {
       if (effectTrackDepth <= maxMarkerBits) {
         // 根据w和n的标识，完成依赖清理&分支切换
         finalizeDepMarkers(effectFn)
@@ -69,15 +72,15 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
   }
   effectFn.deps = []
   effectFn.options = options
-  if (!options.lazy) {
+  if (!options.lazy)
     effectFn()
-  }
+
   effectFn.stop = function () {
     const { deps } = effectFn
     if (deps.length) {
-      for (let i = 0; i < deps.length; i++) {
+      for (let i = 0; i < deps.length; i++)
         deps[i].delete(effectFn)
-      }
+
       deps.length = 0
     }
   }
@@ -86,16 +89,17 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
   return effectFn
 }
 export function track(target, key, type: TrackOpTypes = TrackOpTypes.Default) {
-  if (!activeEffect || !shouldTrack) return
+  if (!activeEffect || !shouldTrack)
+    return
   // objs(WeaKMap)->keys(Map)->effectFn(Set)
   let depsMap = bucket.get(target)
-  if (!depsMap) {
+  if (!depsMap)
     bucket.set(target, (depsMap = new Map()))
-  }
+
   let deps = depsMap.get(key)
-  if (!deps) {
+  if (!deps)
     deps = createDep()
-  }
+
   depsMap.set(key, deps)
   // 标记依赖
   trackEffects(deps)
@@ -109,7 +113,8 @@ function trackEffects(deps) {
       // 如果依赖已经被收集，则不需要再次收集
       shouldTrack = !wasTracked(deps)
     }
-  } else {
+  }
+  else {
     // 当前依赖在现在这轮依赖收集中已经收集过了
     shouldTrack = !deps.has(activeEffect)
   }
@@ -122,57 +127,62 @@ function trackEffects(deps) {
 }
 
 export function trigger(target, key, type: TriggerOpTypes = TriggerOpTypes.Default, newVal?) {
-  let depsMap = bucket.get(target)
-  if (!depsMap) return
-  let deps = depsMap.get(key)
-  let effectToRun = new Set<effectFnType>()
-  deps &&
-    deps.forEach(effectFn => {
+  const depsMap = bucket.get(target)
+  if (!depsMap)
+    return
+  const deps = depsMap.get(key)
+  const effectToRun = new Set<effectFnType>()
+  deps
+    && deps.forEach((effectFn) => {
       // 避免无限递归
-      if (effectFn !== activeEffect) effectToRun.add(effectFn)
+      if (effectFn !== activeEffect)
+        effectToRun.add(effectFn)
     })
   if (
-    type === TriggerOpTypes.ADD ||
-    type === TriggerOpTypes.DELETE ||
-    (type === TriggerOpTypes.SET && Object.prototype.toString.call(target) == '[object Map]')
+    type === TriggerOpTypes.ADD
+    || type === TriggerOpTypes.DELETE
+    || (type === TriggerOpTypes.SET && Object.prototype.toString.call(target) === '[object Map]')
   ) {
     const itrateDeps = depsMap.get(ITERATE_KEY)
-    itrateDeps &&
-      itrateDeps.forEach(effectFn => {
-        if (effectFn !== activeEffect) effectToRun.add(effectFn)
+    itrateDeps
+      && itrateDeps.forEach((effectFn) => {
+        if (effectFn !== activeEffect)
+          effectToRun.add(effectFn)
       })
   }
   if (
-    (type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE) &&
-    Object.prototype.toString.call(target) == '[object Map]'
+    (type === TriggerOpTypes.ADD || type === TriggerOpTypes.DELETE)
+    && Object.prototype.toString.call(target) === '[object Map]'
   ) {
     const itrateDeps = depsMap.get(MAP_KEY_ITERATE_KEY)
-    itrateDeps &&
-      itrateDeps.forEach(effectFn => {
-        if (effectFn !== activeEffect) effectToRun.add(effectFn)
+    itrateDeps
+      && itrateDeps.forEach((effectFn) => {
+        if (effectFn !== activeEffect)
+          effectToRun.add(effectFn)
       })
   }
   if (type === TriggerOpTypes.ADD && Array.isArray(target)) {
     const lengthEffects = depsMap.get('length')
-    lengthEffects &&
-      lengthEffects.forEach(effectFn => {
-        if (effectFn !== activeEffect) effectToRun.add(effectFn)
+    lengthEffects
+      && lengthEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect)
+          effectToRun.add(effectFn)
       })
   }
   if (Array.isArray(target) && key === 'length') {
     depsMap.forEach((effects, key) => {
       if (key >= newVal) {
-        effects.forEach(effectFn => {
-          if (effectFn !== activeEffect) effectToRun.add(effectFn)
+        effects.forEach((effectFn) => {
+          if (effectFn !== activeEffect)
+            effectToRun.add(effectFn)
         })
       }
     })
   }
   effectToRun.forEach((effectFn: any) => {
-    if (effectFn.options.scheduler) {
+    if (effectFn.options.scheduler)
       effectFn.options.scheduler(effectFn)
-    } else {
+    else
       effectFn()
-    }
   })
 }

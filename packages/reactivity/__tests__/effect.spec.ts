@@ -1,5 +1,5 @@
-import { reactive, effect, shallowReactive } from '../src/index'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { effect, reactive, shallowReactive } from '../src/index'
 describe('effect', () => {
   beforeEach(() => {
     // 使用假的时间
@@ -36,7 +36,7 @@ describe('effect', () => {
     }
     let message = ''
     const obj = reactive(data)
-    let fn = vi.fn(() => {
+    const fn = vi.fn(() => {
       message = obj.ok ? obj.text : 'none'
     })
     effect(fn)
@@ -96,11 +96,11 @@ describe('effect', () => {
     const data = { foo: true, bar: true }
     const obj = reactive(data)
     let dummy1, dummy2
-    let fn1 = vi.fn(() => {})
-    let fn2 = vi.fn(() => {})
-    effect(function effectFn1() {
+    const fn1 = vi.fn(() => {})
+    const fn2 = vi.fn(() => {})
+    effect(() => {
       fn1()
-      effect(function effectFn2() {
+      effect(() => {
         fn2()
         dummy2 = obj.bar
       })
@@ -116,14 +116,14 @@ describe('effect', () => {
     expect(fn2).toHaveBeenCalledTimes(3)
   })
   it('effect lazy', () => {
-    let data = { age: 1 }
-    let obj = reactive(data)
-    let fn = vi.fn(n => {})
-    let effectFn = effect(
+    const data = { age: 1 }
+    const obj = reactive(data)
+    const fn = vi.fn((n) => {})
+    const effectFn = effect(
       () => {
         fn(obj.age)
       },
-      { lazy: true }
+      { lazy: true },
     )
     expect(fn).toHaveBeenCalledTimes(0)
     effectFn()
@@ -132,7 +132,7 @@ describe('effect', () => {
   it('effect scheduler', async () => {
     const data = { age: 1 }
     const obj = reactive(data)
-    let arr: any[] = []
+    const arr: any[] = []
     effect(
       () => {
         arr.push(obj.age)
@@ -141,9 +141,9 @@ describe('effect', () => {
         scheduler(fn) {
           setTimeout(fn) // 下一个任务循环
         },
-      }
+      },
     )
-    let arr1: any[] = []
+    const arr1: any[] = []
     effect(() => {
       arr1.push(obj.age)
     })
@@ -172,7 +172,8 @@ describe('effect', () => {
     const p = Promise.resolve()
     let isFlushing = false
     function flushJob() {
-      if (isFlushing) return
+      if (isFlushing)
+        return
       isFlushing = true
       p.then(() => {
         jobQueue.forEach(job => job())
@@ -180,13 +181,13 @@ describe('effect', () => {
         isFlushing = false
       })
     }
-    let fnOb = {
+    const fnOb = {
       count(n) {
         // console.log(n)
         return n
       },
     }
-    let fn = vi.spyOn(fnOb, 'count')
+    const fn = vi.spyOn(fnOb, 'count')
     effect(
       () => {
         fnOb.count(obj.age)
@@ -196,7 +197,7 @@ describe('effect', () => {
           jobQueue.add(fn)
           flushJob()
         },
-      }
+      },
     )
     obj.age++
     obj.age++
@@ -208,11 +209,11 @@ describe('effect', () => {
     expect(fn).toHaveBeenCalledWith(4)
   })
   it('stop effect', () => {
-    let data = reactive({
+    const data = reactive({
       name: 'xiaoming',
     })
-    let fn = vi.fn((...args) => {})
-    let effectFn = effect(() => {
+    const fn = vi.fn((...args) => {})
+    const effectFn = effect(() => {
       fn(data.name)
     })
     data.name = 'xiaoxiaoming'

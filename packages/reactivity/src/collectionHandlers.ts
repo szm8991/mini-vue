@@ -1,21 +1,24 @@
-import { ReactiveFlags, reactive } from './reactive'
-import { track, trigger } from './effect'
+import { hasChanged, isMap } from '@ming/shared'
 import { ITERATE_KEY } from './baseHanlders'
+import { track, trigger } from './effect'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
+import { ReactiveFlags, reactive } from './reactive'
 export const MAP_KEY_ITERATE_KEY = Symbol('map-key-iterate')
 const mutableInstrumentations = {
   add(key) {
     const target = this[ReactiveFlags.RAW]
     const hadKey = target.has(key)
     const res = target.add(key)
-    if (!hadKey) trigger(target, key, TriggerOpTypes.ADD)
+    if (!hadKey)
+      trigger(target, key, TriggerOpTypes.ADD)
     return res
   },
   delete(key) {
     const target = this[ReactiveFlags.RAW]
     const hadKey = target.has(key)
     const res = target.delete(key)
-    if (hadKey) trigger(target, key, TriggerOpTypes.DELETE)
+    if (hadKey)
+      trigger(target, key, TriggerOpTypes.DELETE)
     return res
   },
   get(key) {
@@ -33,8 +36,9 @@ const mutableInstrumentations = {
     const oldValue = target.get(key)
     const rawValue = value.raw || value
     target.set(key, rawValue)
-    if (!had) trigger(target, key, TriggerOpTypes.ADD)
-    else if (oldValue !== value || (oldValue === oldValue && value === value))
+    if (!had)
+      trigger(target, key, TriggerOpTypes.ADD)
+    else if (hasChanged(value, oldValue))
       trigger(target, key, TriggerOpTypes.SET)
   },
   has(key) {
@@ -52,19 +56,15 @@ const mutableInstrumentations = {
     })
   },
   clear() {
-    // const target = this[ReactiveFlags.RAW]
-    // const hadItems = target.size !== 0
-    // const oldTarget = __DEV__
-    //   ? isMap(target)
-    //     ? new Map(target)
-    //     : new Set(target)
-    //   : undefined
-    // // forward the operation before queueing reactions
-    // const result = target.clear()
-    // if (hadItems) {
-    //   trigger(target, TriggerOpTypes.CLEAR, undefined, undefined, oldTarget)
-    // }
-    // return result
+    const target = this[ReactiveFlags.RAW]
+    const hadItems = target.size !== 0
+    const oldTarget = isMap(target) ? new Map(target) : new Set(target)
+    // forward the operation before queueing reactions
+    const result = target.clear()
+    if (hadItems)
+      trigger(target, undefined, TriggerOpTypes.CLEAR, undefined)
+
+    return result
   },
   [Symbol.iterator]: createIterableMethod(Symbol.iterator),
   entries: createIterableMethod('entries'),
@@ -74,7 +74,7 @@ const mutableInstrumentations = {
 function createIterableMethod(method) {
   return function iterationMethod(this: any) {
     const wrap = val => (typeof val === 'object' ? reactive(val) : val)
-    const isMap = target => Object.prototype.toString.call(target) == '[object Map]'
+    const isMap = target => Object.prototype.toString.call(target) === '[object Map]'
     const target = this[ReactiveFlags.RAW]
     const targetIsMap = isMap(target)
     const isPair = method === 'entries' || (method === Symbol.iterator && targetIsMap)
@@ -100,11 +100,12 @@ function createIterableMethod(method) {
 
 function keysIterationMethod(this: any) {
   const wrap = val => (typeof val === 'object' ? reactive(val) : val)
-  const isMap = target => Object.prototype.toString.call(target) == '[object Map]'
+  const isMap = target => Object.prototype.toString.call(target) === '[object Map]'
   const target = this[ReactiveFlags.RAW]
   const itr = target.keys()
   const targetIsMap = isMap(target)
-  if (targetIsMap) track(target, MAP_KEY_ITERATE_KEY)
+  if (targetIsMap)
+    track(target, MAP_KEY_ITERATE_KEY)
   else track(target, ITERATE_KEY)
   return {
     next() {
@@ -139,7 +140,8 @@ function valuesIterationMethod(this: any) {
 }
 export const collectionHandlers = {
   get(target, key) {
-    if (key === ReactiveFlags.RAW) return target
+    if (key === ReactiveFlags.RAW)
+      return target
     if (key === 'size') {
       track(target, ITERATE_KEY)
       return Reflect.get(target, key, target)

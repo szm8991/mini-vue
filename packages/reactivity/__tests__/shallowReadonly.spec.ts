@@ -1,5 +1,5 @@
-import { isReactive, shallowReadonly, readonly, isReadonly } from '../src/index'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { isReactive, isReadonly, readonly, shallowReadonly } from '../src/index'
 describe('shallowReadonly', () => {
   it('should not make non-reactive properties reactive', () => {
     const props = shallowReadonly({ n: { foo: 1 } })

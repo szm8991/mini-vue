@@ -1,5 +1,5 @@
-import { reactive, isReactive, shallowReactive, isShallow } from '../src/index'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { isReactive, isShallow, reactive, shallowReactive } from '../src/index'
 describe('shallowReactive', () => {
   it('should not make non-reactive properties reactive', () => {
     const props = shallowReactive({ n: { foo: 1 } })

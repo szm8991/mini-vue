@@ -1,11 +1,11 @@
-import { reactive, effect, shallowReactive } from '../src/index'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { effect, reactive } from '../src/index'
 describe('effect set', () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
   it('test set ', () => {
-    let set = reactive(new Set([1]))
+    const set = reactive(new Set([1]))
     let val
     effect(() => {
       val = set.size
@@ -38,7 +38,7 @@ describe('effect set', () => {
     const set = reactive(new Set() as Set<number>)
     effect(() => {
       dummy = 0
-      for (let num of set) {
+      for (const num of set) {
         // console.log(num)
         dummy += num
       }
@@ -56,9 +56,8 @@ describe('effect set', () => {
     const set = reactive(new Set() as Set<number>)
     effect(() => {
       dummy = 0
-      for (let num of set.values()) {
+      for (const num of set.values())
         dummy += num
-      }
     })
 
     expect(dummy).toBe(0)
@@ -74,9 +73,8 @@ describe('effect set', () => {
     const set = reactive(new Set() as Set<number>)
     effect(() => {
       dummy = 0
-      for (let num of set.keys()) {
+      for (const num of set.keys())
         dummy += num
-      }
     })
     expect(dummy).toBe(0)
     set.add(2)
@@ -91,8 +89,8 @@ describe('effect set', () => {
     const set = reactive(new Set<number>())
     effect(() => {
       dummy = 0
-      // eslint-disable-next-line no-unused-vars
-      for (let [key, num] of set.entries()) {
+
+      for (const [key, num] of set.entries()) {
         key
         dummy += num
       }

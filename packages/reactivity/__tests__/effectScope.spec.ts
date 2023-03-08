@@ -1,5 +1,5 @@
-import { effect, reactive, computed, effectScope, EffectScope } from '../src'
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { EffectScope, computed, effect, effectScope, reactive } from '../src'
 
 describe('effectScope', () => {
   it('should run', () => {
@@ -128,7 +128,7 @@ describe('effectScope', () => {
 
   it('effectScope使用', () => {
     const data = reactive({ num: 1 })
-    let scope = effectScope()
+    const scope = effectScope()
     let num
     scope.run(() => {
       effect(() => (num = data.num))
@@ -142,7 +142,7 @@ describe('effectScope', () => {
   })
   it('effectScope + computed', () => {
     const data = reactive({ num: 1 })
-    let scope = effectScope()
+    const scope = effectScope()
     let double
     scope.run(() => {
       double = computed(() => data.num * 2)
@@ -158,7 +158,7 @@ describe('effectScope', () => {
   it('effectScope嵌套', () => {
     const data = reactive({ num: 1 })
     let double, triple, fourble
-    let scope1 = effectScope()
+    const scope1 = effectScope()
     let scope2
     let scope3
     scope1.run(() => {
@@ -182,18 +182,18 @@ describe('effectScope', () => {
     expect(triple).toBe(3)
     expect(fourble).toBe(4)
 
-    data.num++ //2
+    data.num++ // 2
     expect(double).toBe(4)
     expect(triple).toBe(6)
     expect(fourble).toBe(8)
 
-    scope3.stop() //最里层的终止了
+    scope3.stop() // 最里层的终止了
     data.num++ // 3
     expect(double).toBe(6)
     expect(triple).toBe(9)
     expect(fourble).toBe(8)
 
-    scope1.stop() //最外层的stop了，scope2也要终止
+    scope1.stop() // 最外层的stop了，scope2也要终止
     data.num++
     expect(double).toBe(6)
     expect(triple).toBe(9)

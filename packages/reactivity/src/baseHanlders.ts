@@ -1,16 +1,12 @@
-import { startTrack, stopTrack, track, trigger } from './effect'
 import { hasOwn } from '@ming/shared'
-import {
-  reactive,
-  readonly,
-  ReactiveFlags,
-  reactiveMap,
-  shallowReactiveMap,
-  readonlyMap,
-} from './reactive'
+import { startTrack, stopTrack, track, trigger } from './effect'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
+import {
+  ReactiveFlags, reactive,
+  reactiveMap, readonly, readonlyMap, shallowReactiveMap,
+} from './reactive'
 const arrayInstrumentations = {}
-;['push', 'pop', 'shift', 'unshift'].forEach(method => {
+;['push', 'pop', 'shift', 'unshift'].forEach((method) => {
   const originMethod = Array.prototype[method]
   arrayInstrumentations[method] = function (...args) {
     stopTrack()
@@ -19,7 +15,7 @@ const arrayInstrumentations = {}
     return res
   }
 })
-;['includes', 'indexOf', 'lastIndexOf'].forEach(method => {
+;['includes', 'indexOf', 'lastIndexOf'].forEach((method) => {
   const originMethod = Array.prototype[method]
   arrayInstrumentations[method] = function (...args) {
     // this 是代理对象，先在代理对象中查找，将结果存储到 res 中
@@ -37,45 +33,44 @@ const set = createSetter()
 const shallowReactiveGet = createGetter(true)
 const readonlyReactiveGet = createGetter(false, true)
 const shallowReadonlyGet = createGetter(true, true)
-function createGetter(isShallow: boolean = false, isReadonly: boolean = false) {
+function createGetter(isShallow = false, isReadonly = false) {
   return function get(target, key, receiver) {
     // 是不是已经存在map中，避免重复创建
     const isExistMap = () =>
-      key === ReactiveFlags.RAW &&
-      (receiver === reactiveMap.get(target) ||
-        receiver === shallowReactiveMap.get(target) ||
-        receiver === readonlyMap.get(target))
-    if (isExistMap()) {
+      key === ReactiveFlags.RAW
+      && (receiver === reactiveMap.get(target)
+        || receiver === shallowReactiveMap.get(target)
+        || receiver === readonlyMap.get(target))
+    if (isExistMap())
       return target
-    }
-    if (key === ReactiveFlags.IS_REACTIVE) {
+
+    if (key === ReactiveFlags.IS_REACTIVE)
       return !isReadonly
-    } else if (key === ReactiveFlags.IS_READONLY) {
+    else if (key === ReactiveFlags.IS_READONLY)
       return isReadonly
-    } else if (key === ReactiveFlags.IS_SHALLOW) {
+    else if (key === ReactiveFlags.IS_SHALLOW)
       return isShallow
-    } else if (key === ReactiveFlags.RAW) {
+    else if (key === ReactiveFlags.RAW)
       return target
-    }
 
     if (Array.isArray(target) && hasOwn(arrayInstrumentations, key))
       return Reflect.get(arrayInstrumentations, key, receiver)
     // 解决getter访问时this指向target而不是代理对象的问题
     const res = Reflect.get(target, key, receiver)
-    if (!isReadonly && typeof key != 'symbol') {
+    if (!isReadonly && typeof key != 'symbol')
       track(target, key, TrackOpTypes.GET)
-    }
-    if (isShallow) {
+
+    if (isShallow)
       return res
-    }
+
     // deep-lazy
-    if (typeof res === 'object' && res !== null) {
+    if (typeof res === 'object' && res !== null)
       return isReadonly ? readonly(res) : reactive(res)
-    }
+
     return res
   }
 }
-function createSetter(isShallow: boolean = false, isReadonly: boolean = false) {
+function createSetter(isShallow = false, isReadonly = false) {
   return function set(target, key, newValue, receiver) {
     if (isReadonly) {
       console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target)
@@ -87,13 +82,14 @@ function createSetter(isShallow: boolean = false, isReadonly: boolean = false) {
         ? TriggerOpTypes.SET
         : TriggerOpTypes.ADD // 越界标记为add
       : hasOwn(target, key)
-      ? TriggerOpTypes.SET
-      : TriggerOpTypes.ADD
+        ? TriggerOpTypes.SET
+        : TriggerOpTypes.ADD
     const res = Reflect.set(target, key, newValue, receiver)
     if (target === receiver[ReactiveFlags.RAW]) {
       // if(oldValue !== newValue && (oldValue === oldValue || newValue === newValue))
       // 判断新老值是否一样，如果不一样，则触发trigger
-      if (!Object.is(oldValue, newValue)) trigger(target, key, type, newValue)
+      if (!Object.is(oldValue, newValue))
+        trigger(target, key, type, newValue)
     }
     return res
   }
@@ -111,7 +107,8 @@ function deleteProperty(target, key) {
   // }
   const hadKey = Object.prototype.hasOwnProperty.call(target, key)
   const result = Reflect.deleteProperty(target, key)
-  if (result && hadKey) trigger(target, key, TriggerOpTypes.DELETE)
+  if (result && hadKey)
+    trigger(target, key, TriggerOpTypes.DELETE)
   return result
 }
 export const ITERATE_KEY = Symbol('iterate')

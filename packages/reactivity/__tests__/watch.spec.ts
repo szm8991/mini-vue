@@ -1,5 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive, watch } from '../src'
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 function sleep(time: number) {
   return new Promise<number>((resolve, reject) => {
     setTimeout(() => {
@@ -12,14 +12,14 @@ describe('watch', () => {
     vi.useFakeTimers()
   })
   it('basic watch', () => {
-    let data = { age: 1 }
-    let obj = reactive(data)
-    let fn = vi.fn((a1, a2) => {})
+    const data = { age: 1 }
+    const obj = reactive(data)
+    const fn = vi.fn((a1, a2) => {})
     watch(
       () => obj.age,
       (newValue, oldValue) => {
         fn(newValue, oldValue)
-      }
+      },
     )
     expect(fn).toHaveBeenCalledTimes(0)
     obj.age++
@@ -28,9 +28,9 @@ describe('watch', () => {
   })
 
   it('options watch', async () => {
-    let data = { age: 1 }
-    let obj = reactive(data)
-    let fn = vi.fn((a1, a2) => {})
+    const data = { age: 1 }
+    const obj = reactive(data)
+    const fn = vi.fn((a1, a2) => {})
     watch(
       () => obj.age,
       (newValue, oldValue) => {
@@ -39,7 +39,7 @@ describe('watch', () => {
       {
         immediate: true,
         flush: 'post',
-      }
+      },
     )
     expect(fn).toHaveBeenCalledTimes(1)
     // newValue为obj.age,oldValue为undefined
@@ -50,9 +50,9 @@ describe('watch', () => {
     expect(fn).toHaveBeenCalledWith(2, 1)
   })
   it('options watch object', async () => {
-    let data = { age: 1 }
-    let obj = reactive(data)
-    let fn = vi.fn((a1, a2) => {})
+    const data = { age: 1 }
+    const obj = reactive(data)
+    const fn = vi.fn((a1, a2) => {})
     watch(
       obj,
       (newValue, oldValue) => {
@@ -60,7 +60,7 @@ describe('watch', () => {
       },
       {
         immediate: true,
-      }
+      },
     )
     expect(fn).toHaveBeenCalledTimes(1)
     expect(fn).toHaveBeenCalledWith({ age: 1 }, undefined)
@@ -70,8 +70,8 @@ describe('watch', () => {
     expect(fn).toHaveBeenCalledWith({ age: 2 }, { age: 2 })
   })
   it('options watch object', async () => {
-    let data = { age: 1 }
-    let obj = reactive(data)
+    const data = { age: 1 }
+    const obj = reactive(data)
     let expired = false
     watch(obj, async (newValue, oldValue, onInvalidate) => {
       onInvalidate(() => {

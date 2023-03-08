@@ -1,5 +1,5 @@
-import { reactive, isReactive, effect } from '../src/index'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { effect, isReactive, reactive } from '../src/index'
 describe('reactive', () => {
   it('retrun a reactive object', () => {
     const original = { name: 'xiaoming' }
@@ -27,7 +27,7 @@ describe('reactive', () => {
   it('delete property', () => {
     const data = { name: 'xiaoming', age: 18 }
     const obj = reactive(data)
-    let fn = vi.fn(arg => {})
+    const fn = vi.fn((arg) => {})
     effect(() => {
       fn(obj.name)
     })
@@ -38,7 +38,7 @@ describe('reactive', () => {
   it('has', () => {
     const data = { name: 'xiaoming', age: 18 }
     const obj = reactive(data)
-    let fn = vi.fn(arg => {})
+    const fn = vi.fn((arg) => {})
     effect(() => {
       fn('name' in obj)
     })
@@ -49,8 +49,8 @@ describe('reactive', () => {
     expect(fn).toHaveBeenCalledTimes(2)
   })
   it('ownkeys', () => {
-    let obj = reactive({ name: 'xiaoming' })
-    let fn = vi.fn(arg => {})
+    const obj = reactive({ name: 'xiaoming' })
+    const fn = vi.fn((arg) => {})
     effect(() => {
       fn(Object.keys(obj))
     })
@@ -61,20 +61,19 @@ describe('reactive', () => {
     expect(fn).toHaveBeenCalledWith(['name', 'age'])
   })
   it('for in', () => {
-    let obj = reactive({ name: 'xiaoming' })
-    let fn = vi.fn(() => {})
+    const obj = reactive({ name: 'xiaoming' })
+    const fn = vi.fn(() => {})
     effect(() => {
-      for (const key in obj) {
+      for (const key in obj)
         fn()
-      }
     })
     expect(fn).toHaveBeenCalledTimes(1)
     obj.name = 'xiaoxiaoming'
     expect(fn).toHaveBeenCalledTimes(1)
   })
   it('oldVal equal newVal', () => {
-    let obj = reactive({ age: 1 })
-    let fn = vi.fn(arg1 => {})
+    const obj = reactive({ age: 1 })
+    const fn = vi.fn((arg1) => {})
     effect(() => {
       fn(obj.age)
     })
@@ -85,12 +84,12 @@ describe('reactive', () => {
     expect(fn).toHaveBeenCalledTimes(2)
   })
   it('prototype raw', () => {
-    let obj = {}
-    let proto = { age: 1 }
-    let child = reactive(obj)
-    let parent = reactive(proto)
+    const obj = {}
+    const proto = { age: 1 }
+    const child = reactive(obj)
+    const parent = reactive(proto)
     Object.setPrototypeOf(child, parent)
-    let fn = vi.fn(arg1 => {})
+    const fn = vi.fn((arg1) => {})
     effect(() => {
       fn(child.age)
     })

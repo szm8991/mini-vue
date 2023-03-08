@@ -1,6 +1,6 @@
+import { isObject } from '@ming/shared'
 import { track, trigger } from './effect'
 import { reactive } from './reactive'
-import { isObject } from '@ming/shared'
 function convert(val) {
   return isObject(val) ? reactive(val) : val
 }
@@ -12,10 +12,12 @@ class RefImpl<T> {
     this._rawValue = val
     this._val = convert(val)
   }
+
   get value() {
     track(this, 'value')
     return this._val
   }
+
   set value(val) {
     if (val !== this._val) {
       this._val = convert(val)
@@ -27,7 +29,8 @@ export function isRef(val) {
   return !!(val && val.__isRef)
 }
 function createRef(rawVal, isShallow: boolean) {
-  if (isRef(rawVal)) return rawVal
+  if (isRef(rawVal))
+    return rawVal
   return new RefImpl(rawVal)
 }
 export function ref(val?) {

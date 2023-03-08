@@ -1,5 +1,5 @@
-import { effectFnType } from './effect'
-//设计有点类似effect, active记录当前的effectscope
+import type { effectFnType } from './effect'
+// 设计有点类似effect, active记录当前的effectscope
 let activeEffectScope: EffectScope | undefined
 // 可能轮询调用，记录栈
 const effectScopeStack: EffectScope[] = []
@@ -22,6 +22,7 @@ export class EffectScope {
       this.index = (activeEffectScope.scopes || (activeEffectScope.scopes = [])).push(this) - 1
     }
   }
+
   run<T>(fn: () => T): T | undefined {
     if (this.active) {
       try {
@@ -29,30 +30,35 @@ export class EffectScope {
         this.on()
         // 执行
         return fn()
-      } finally {
+      }
+      finally {
         this.off()
       }
     }
   }
+
   on() {
     // 将当前scope入栈，并设置为当前effect
     effectScopeStack.push(this)
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     activeEffectScope = this
   }
+
   // 关闭收集
   off() {
     // effectScope嵌套的时候 逻辑和effect类似
     effectScopeStack.pop()
     activeEffectScope = effectScopeStack[effectScopeStack.length - 1]
   }
+
   stop(fromParent?: boolean) {
     if (this.active) {
       // 停止所有监听 调用effect自己的stop
       this.effects.forEach(e => e.stop())
       // 停止子级scope
-      if (this.scopes) {
+      if (this.scopes)
         this.scopes.forEach(e => e.stop(true))
-      }
+
       //   if (this.parent && !fromParent) {
       //     // optimized O(1) removal
       //     const last = this.parent.scopes!.pop()

@@ -1,5 +1,5 @@
-import { ref, isRef, unRef, effect, isReactive, reactive } from '../src'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { effect, isReactive, isRef, reactive, ref, unRef } from '../src'
 
 describe('ref', () => {
   it('simple ref', () => {
