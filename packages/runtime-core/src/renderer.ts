@@ -1,4 +1,6 @@
 import { ShapeFlags } from '@ming/shared'
+import { createComponentInstance, setupComponent } from './component'
+import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
 export function createRenderer(options: any) {
   const {
@@ -37,13 +39,35 @@ export function createRenderer(options: any) {
     }
   }
   function processElement(n1, n2, container, anchor, parentComponent) {
-
+    if (!n1) {
+      mountElement(n2, container, anchor)
+    }
+    else {
+      // todo
+    }
   }
-
+  function mountElement(vnode, container, anchor) {
+    const el = (vnode.el = hostCreateElement(vnode.type))
+    hostInsert(el, container, anchor)
+  }
   function processComponent(n1, n2, container, parentComponent) {
+    if (!n1)
+      mountComponent(n2, container, parentComponent)
+    else
+      updateComponent(n1, n2, container)
+  }
+  function updateComponent(n1, n2, container) {
 
   }
+  function mountComponent(vnode, container, parentComponent) {
+    const instance = (vnode.component = createComponentInstance(
+      vnode,
+      parentComponent,
+    ))
+    setupComponent(instance)
 
+    setupRenderEffect(instance, vnode, container)
+  }
   function processText(n1, n2, container) {
 
   }
@@ -51,5 +75,9 @@ export function createRenderer(options: any) {
   function processFragment(n1, n2, container) {
 
   }
-  return { render }
+  function setupRenderEffect(instance: any, vnode: any, container: any) {
+    const subTree = instance.render()
+    patch(null, subTree, container)
+  }
+  return { render, createApp: createAppAPI(render) }
 }

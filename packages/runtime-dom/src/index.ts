@@ -1,5 +1,5 @@
 import { createRenderer } from '@ming/runtime-core'
-import { shouldSetAsProps } from './../../shared/src/index'
+import { shouldSetAsProps } from '@ming/shared'
 // element节点
 function createElement(tag) {
   return document.createElement(tag)
