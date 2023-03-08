@@ -36,6 +36,7 @@ interface EffectOption {
   immediate?: boolean
   scheduler?: (...args: any[]) => void
   scope?: EffectScope
+  onStop?: (...args: any[]) => void
 }
 export function effect<T>(fn: () => T, options: EffectOption = {}) {
   const effectFn = () => {
@@ -76,6 +77,7 @@ export function effect<T>(fn: () => T, options: EffectOption = {}) {
     effectFn()
 
   effectFn.stop = function () {
+    options.onStop && options.onStop()
     const { deps } = effectFn
     if (deps.length) {
       for (let i = 0; i < deps.length; i++)

@@ -221,5 +221,16 @@ describe('effect', () => {
     effectFn.stop()
     data.name = 'xiaoming'
     expect(fn).toHaveBeenCalledTimes(2)
+    effectFn()
+    expect(fn).toHaveBeenCalledTimes(3)
+  })
+  it('events: onStop', () => {
+    const onStop = vi.fn()
+    const runner = effect(() => {}, {
+      onStop,
+    })
+
+    runner.stop()
+    expect(onStop).toHaveBeenCalled()
   })
 })
