@@ -1,8 +1,6 @@
-// 源码里面这些接口是由 runtime-dom 来实现
-// 这里先简单实现
-
 import { createRenderer } from '@ming/runtime-core'
 import { shouldSetAsProps } from './../../shared/src/index'
+// element节点
 function createElement(tag) {
   return document.createElement(tag)
 }
@@ -11,6 +9,9 @@ function setElementText(el, text) {
 }
 function insert(el, parent, anchor = null) {
   parent.insertBefore(el, anchor)
+}
+function clear(el) {
+  el.innerHTML = ''
 }
 // 文本和注释节点
 function createText(text) {
@@ -78,6 +79,7 @@ function ensureRenderer() {
       patchProp,
       insert,
       remove,
+      clear,
     }))
   )
 }
