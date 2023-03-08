@@ -20,6 +20,7 @@ class RefImpl<T> {
 
   set value(val) {
     if (val !== this._val) {
+      this._rawValue = val
       this._val = convert(val)
       trigger(this, 'value')
     }
