@@ -1,5 +1,5 @@
 {
-  "name": "@ming/compiler-core",
+  "name": "@ming/runtime-dom",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
@@ -8,7 +8,8 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
@@ -17,14 +18,13 @@
     "lint": "eslint src --fix",
     "release": "npx bumpp --commit --push --tag"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@ming/shared": "workspace:*"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "dependencies": {
-    "@ming/shared": "workspace:*"
   }
 }
