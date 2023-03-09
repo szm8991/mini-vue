@@ -39,12 +39,16 @@ function patchProp(el, key, preValue, nextValue) {
     else {
       if (nextValue) {
         invoker = invokers[key] = (e) => {
+          // e.timeStamp->事件发生的时间
+          if (e.timeStamp < invoker.attached)
+            return
           if (isArray(invoker.value))
             invoker.value.forEach(fn => fn(e))
           else
             invoker.value(e)
         }
         invoker.value = nextValue
+        invoker.attached = performance.now()
         el.addEventListener(eventName, invoker)
       }
       else {

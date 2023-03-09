@@ -22,7 +22,8 @@
   "dependencies": {
     "@ming/compiler": "workspace:*",
     "@ming/runtime-dom": "workspace:*",
-    "@ming/shared": "workspace:*"
+    "@ming/shared": "workspace:*",
+    "@ming/reactive": "workspace:*"
   },
   "devDependencies": {}
 }
