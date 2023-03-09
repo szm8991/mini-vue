@@ -7,7 +7,9 @@ export const Prop = {
     return h('h1', {}, `foo:${this.count} ${this.$attrs.title}`)
   },
   setup(props) {
-    console.log(props)
+    console.log(props.count)
+    props.count++
+    console.log(props.count)
     return {
       msg: 'world',
     }

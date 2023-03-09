@@ -34,8 +34,10 @@ importers:
 
   packages/runtime-core:
     specifiers:
+      '@ming/reactive': workspace:*
       '@ming/shared': workspace:*
     dependencies:
+      '@ming/reactive': link:../reactivity
       '@ming/shared': link:../shared
 
   packages/runtime-dom:
@@ -51,11 +53,13 @@ importers:
 
   packages/vue:
     specifiers:
-      '@ming/compiler': workspace:^1.0.0
-      '@ming/runtime-dom': workspace:^1.0.0
-      '@ming/shared': workspace:^1.0.0
+      '@ming/compiler': workspace:*
+      '@ming/reactive': workspace:*
+      '@ming/runtime-dom': workspace:*
+      '@ming/shared': workspace:*
     dependencies:
       '@ming/compiler': link:../compiler
+      '@ming/reactive': link:../reactivity
       '@ming/runtime-dom': link:../runtime-dom
       '@ming/shared': link:../shared
 

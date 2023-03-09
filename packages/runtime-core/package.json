@@ -12,7 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ming/shared": "workspace:*"
+    "@ming/shared": "workspace:*",
+    "@ming/reactive": "workspace:*"
   },
   "publishConfig": {
     "access": "public",
