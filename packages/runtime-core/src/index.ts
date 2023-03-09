@@ -1,4 +1,5 @@
 export * from './component'
 export * from './h'
+export * from './provide'
 export * from './renderer'
 export * from './vnode'
