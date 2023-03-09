@@ -2,6 +2,7 @@ import { proxyRefs, shallowReadonly } from '@ming/reactive'
 import { emit } from './componentEmits'
 import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
+import { initSlots } from './componentSlots'
 
 export function createComponentInstance(vnode, parent) {
   const instance = {
@@ -32,7 +33,7 @@ export function createComponentInstance(vnode, parent) {
 
 export function setupComponent(instance) {
   initProps(instance)
-  // initSlots(instance, children);
+  initSlots(instance)
   setupStatefulComponent(instance)
 }
 function createSetupContext(instance) {
