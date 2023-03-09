@@ -1,7 +1,7 @@
 import { h } from '../dist/index.mjs'
 export const App = {
-  render() {
-    return h('h1', {}, `hello,${this.msg}!`)
+  render(state) {
+    return h('h1', {}, `hello,${state.msg}!`)
   },
   setup() {
     return {

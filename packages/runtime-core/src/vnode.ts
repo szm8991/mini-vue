@@ -13,6 +13,8 @@ export const createVNode = function (
   props?: any,
   children?: string | Array<any>,
 ) {
+  // todo
+  // props.class=normalizeClass(props.class)
   const vnode = {
     el: null,
     component: null,

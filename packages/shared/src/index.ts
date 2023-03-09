@@ -1,8 +1,4 @@
 export const extend = Object.assign
-export const isObject = (val) => {
-  return val !== null && typeof val === 'object'
-}
-export const isString = val => typeof val === 'string'
 export const objectToString = Object.prototype.toString
 export const toTypeString = (value: unknown): string => objectToString.call(value)
 
@@ -22,9 +18,13 @@ export const shouldSetAsProps = (el, key, value) => {
 export const hasChanged = (value: any, oldValue: any): boolean =>
   !Object.is(value, oldValue)
 
+export const isString = (val: unknown): val is string => typeof val === 'string'
 export const isMap = (val: unknown): val is Map<any, any> =>
   toTypeString(val) === '[object Map]'
 export const isSet = (val: unknown): val is Set<any> =>
   toTypeString(val) === '[object Set]'
-
+export const isArray = Array.isArray
+export const isObject = (val: unknown): val is Record<any, any> =>
+  val !== null && typeof val === 'object'
+export * from './normalizeProp'
 export * from './shapeFLags'

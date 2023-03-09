@@ -1,4 +1,4 @@
-import { ShapeFlags } from '@ming/shared'
+import { ShapeFlags, isArray, isString } from '@ming/shared'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
@@ -47,8 +47,24 @@ export function createRenderer(options: any) {
     }
   }
   function mountElement(vnode, container, anchor) {
+    const { shapeFlag, props } = vnode
     const el = (vnode.el = hostCreateElement(vnode.type))
+    // if (shapeFlag & ShapeFlags.TEXT_CHILDREN)
+    if (isString(vnode.children))
+      hostSetElementText(el, vnode.children)
+    else if (isArray((vnode.children)))
+    // else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN)
+      mountChildren(vnode.children, el)
+    if (props) {
+      for (const key in props)
+        hostPatchProp(el, key, null, props[key])
+    }
     hostInsert(el, container, anchor)
+  }
+  function mountChildren(children, container) {
+    children.forEach((child) => {
+      patch(null, child, container)
+    })
   }
   function processComponent(n1, n2, container, parentComponent) {
     if (!n1)
@@ -76,7 +92,7 @@ export function createRenderer(options: any) {
 
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
-    const subTree = instance.render()
+    const subTree = instance.render(instance.setupState || {})
     patch(null, subTree, container)
   }
   return { render, createApp: createAppAPI(render) }
