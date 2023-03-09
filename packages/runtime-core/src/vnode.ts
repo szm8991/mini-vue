@@ -44,3 +44,7 @@ export function normalizeSlotChildren(vnode, children) {
     }
   }
 }
+
+export function createTextVNode(text = ' ') {
+  return createVNode(Text, {}, text)
+}

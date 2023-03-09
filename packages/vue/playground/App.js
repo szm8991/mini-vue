@@ -1,4 +1,4 @@
-import { Fragment, h } from '../dist/index.mjs'
+import { createTextVNode, Fragment, h } from '../dist/index.mjs'
 import { Slot } from './Slot.js'
 export const App = {
   name: 'app',
@@ -6,7 +6,7 @@ export const App = {
     return h(Fragment, {}, [h(Slot, {},
       {
         header(props) {
-          return h('h1', {}, `I'm header${props.age}`)
+          return h(Fragment, {}, [h('h1', {}, `I'm header${props.age}`), createTextVNode('你好')])
         },
         body(props) {
           return h('section', {}, `I'm body${props.age}`)

@@ -95,11 +95,18 @@ export function createRenderer(options: any) {
     setupRenderEffect(instance, vnode, container)
   }
   function processText(n1, n2, container) {
-
+    if (!n1) {
+      hostInsert((n2.el = hostCreateText(n2.children as string)), container)
+    }
+    else {
+      // todo
+    }
   }
 
+  // 只需要渲染 children
   function processFragment(n1, n2, container) {
-
+    if (!n1)
+      mountChildren(n2.children, container)
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
     const subTree = instance.subTree = instance.render.call(instance.proxy) // instance.render(instance.setupState || {})
