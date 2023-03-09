@@ -4,7 +4,7 @@ export const Prop = {
     count: Number,
   },
   render(state) {
-    return h('h1', {}, `foo:${this.count}`)
+    return h('h1', {}, `foo:${this.count} ${this.$attrs.title}`)
   },
   setup(props) {
     console.log(props)
