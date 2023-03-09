@@ -1,4 +1,5 @@
 import { proxyRefs } from '../../reactivity/src'
+import { initProps } from './componentProsp'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 
 export function createComponentInstance(vnode, parent) {
@@ -28,8 +29,7 @@ export function createComponentInstance(vnode, parent) {
 }
 
 export function setupComponent(instance) {
-  const { props, children } = instance.vnode
-  // initProps(instance, props);
+  initProps(instance)
   // initSlots(instance, children);
   setupStatefulComponent(instance)
 }
