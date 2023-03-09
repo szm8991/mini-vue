@@ -1,5 +1,5 @@
 import { createRenderer } from '@ming/runtime-core'
-import { shouldSetAsProps } from '@ming/shared'
+import { normalizeClass, shouldSetAsProps } from '@ming/shared'
 // element节点
 function createElement(tag) {
   return document.createElement(tag)
@@ -49,7 +49,7 @@ function patchProp(el, key, preValue, nextValue) {
   }
   else if (key === 'class') {
     // className设置方式的性能最优
-    el.className = nextValue || ''
+    el.className = normalizeClass(nextValue) || ''
   }
   else if (shouldSetAsProps(el, key, nextValue)) {
     // setAttribute方式设置布尔值会将布尔值变为字符串在设置，需要特殊处理

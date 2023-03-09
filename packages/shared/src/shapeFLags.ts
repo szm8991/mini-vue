@@ -1,5 +1,5 @@
 export const enum ShapeFlags {
-  // 最后要渲染的 element 类型
+  // element 类型
   ELEMENT = 1,
   // 函数组件
   FUNCTIONAL_COMPONENT = 1 << 1,

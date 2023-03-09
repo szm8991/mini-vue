@@ -3,7 +3,13 @@ window.self = null
 export const App = {
   render(state) {
     window.self = this
-    return h('h1', { id: 'root', class: ['foo', 'bar'] },
+    return h('h1', {
+      id: 'root',
+      class: ['foo', 'bar'],
+      onClick() {
+        console.log('click')
+      },
+    },
     `hello,${this.msg}`,
     // [
     //   h('div', { class: 'red' }, 'div1'),
