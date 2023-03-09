@@ -1,4 +1,4 @@
-import { ShapeFlags, isArray, isString } from '@ming/shared'
+import { ShapeFlags } from '@ming/shared'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
@@ -18,8 +18,14 @@ export function createRenderer(options: any) {
     if (vnode)
       patch(container._vnode, vnode, container)
     else
-      container._vnode && hostClear(container)
+      container._vnode && unmount(container._vnode)
     container._vnode = vnode
+  }
+  function unmount(vnode) {
+    const parent = vnode.el.parentNode
+    if (parent)
+      parent.removeChild(vnode.el)
+    else hostClear(vnode.el)
   }
   function patch(n1, n2, container = null, anchor = null, parentComponent = null) {
     // n1-旧的vnode，n2-新的vnode
@@ -49,11 +55,11 @@ export function createRenderer(options: any) {
   function mountElement(vnode, container, anchor) {
     const { shapeFlag, props } = vnode
     const el = (vnode.el = hostCreateElement(vnode.type))
-    // if (shapeFlag & ShapeFlags.TEXT_CHILDREN)
-    if (isString(vnode.children))
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN)
+    // if (isString(vnode.children))
       hostSetElementText(el, vnode.children)
-    else if (isArray((vnode.children)))
-    // else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN)
+    // else if (isArray((vnode.children)))
+    else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN)
       mountChildren(vnode.children, el)
     if (props) {
       for (const key in props)

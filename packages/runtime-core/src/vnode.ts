@@ -1,4 +1,4 @@
-import { ShapeFlags } from '@ming/shared'
+import { ShapeFlags, isArray, isObject, isString } from '@ming/shared'
 
 function getShapeFlag(type: any) {
   return typeof type === 'string'
@@ -24,6 +24,23 @@ export const createVNode = function (
     children,
     shapeFlag: getShapeFlag(type),
   }
+  // 基于 children 再次设置 shapeFlag
+  if (isArray(children))
+    vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN
 
+  else if (isString(children))
+    vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
+
+  normalizeSlotChildren(vnode, children)
   return vnode
+}
+export function normalizeSlotChildren(vnode, children) {
+  if (isObject(children)) {
+    if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
+      // todo
+    }
+    else {
+      vnode.shapeFlag |= ShapeFlags.SLOTS_CHILDREN
+    }
+  }
 }
