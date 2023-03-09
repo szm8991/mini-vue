@@ -1,4 +1,4 @@
-import { toRawType } from '@ming/shared'
+import { isObject, toRawType } from '@ming/shared'
 import {
   mutableHandlers, readonlyHandlers, shallowReactiveHandlers, shallowReadonlyHandlers,
 } from './baseHanlders'
@@ -61,6 +61,10 @@ export function isShallow(value) {
   return !!value[ReactiveFlags.IS_SHALLOW]
 }
 function createReactiveObject(target, proxyMap, baseHandlers) {
+  if (!isObject(target)) {
+    console.warn('the target should be Object', target)
+    return target
+  }
   const existingProxy = proxyMap.get(target)
   if (existingProxy)
     return existingProxy
