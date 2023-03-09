@@ -98,8 +98,11 @@ export function createRenderer(options: any) {
 
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
-    const subTree = instance.render(instance.setupState || {})
+    const subTree = instance.subTree = instance.render.call(instance.proxy) // instance.render(instance.setupState || {})
     patch(null, subTree, container)
+    // 把 root element 赋值给 组件的vnode.el ，为后续调用 $el 的时候获取值
+    vnode.el = subTree.el
+    instance.isMounted = true
   }
   return { render, createApp: createAppAPI(render) }
 }

@@ -1,4 +1,5 @@
 import { proxyRefs } from '../../reactivity/src'
+import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 
 export function createComponentInstance(vnode, parent) {
   const instance = {
@@ -33,6 +34,7 @@ export function setupComponent(instance) {
   setupStatefulComponent(instance)
 }
 function setupStatefulComponent(instance) {
+  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers)
   const Component = instance.type
   const { setup } = Component
   if (setup) {

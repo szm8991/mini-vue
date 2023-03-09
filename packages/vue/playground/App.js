@@ -1,7 +1,15 @@
 import { h } from '../dist/index.mjs'
+window.self = null
 export const App = {
   render(state) {
-    return h('h1', {}, `hello,${state.msg}!`)
+    window.self = this
+    return h('h1', { id: 'root', class: ['foo', 'bar'] },
+    `hello,${this.msg}`,
+    // [
+    //   h('div', { class: 'red' }, 'div1'),
+    //   h('div', { class: 'blue' }, 'div2'),
+    // ]
+    )
   },
   setup() {
     return {
