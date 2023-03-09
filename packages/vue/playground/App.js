@@ -1,33 +1,22 @@
-import { Fragment, h, inject, provide } from '../dist/index.mjs'
-const PI = {
-  name: 'Foo',
-  setup() {
-    const foo = inject('foo')
-    const bar = inject('bar')
-    return {
-      foo,
-      bar,
-    }
-  },
-  render() {
-    return h('div', {}, `foo:${this.foo},bar:${this.bar}`)
-  },
-}
-const PI0 = {
-  name: 'Bar',
-  setup() {
-  },
-  render() {
-    return h(Fragment, {}, [h('div', {}, 'bar'), h(PI, {})])
-  },
-}
+import { Fragment, h, ref } from '../dist/index.mjs'
 export const App = {
   name: 'app',
   render() {
-    return h(Fragment, {}, [h(PI0, {})])
+    return h(Fragment, {},
+      [
+        h('div', {}, `count:${this.count}`),
+        h('button', { onClick: this.onClick }, 'count plus'),
+      ])
   },
   setup() {
-    provide('foo', 'fooVal')
-    provide('bar', 'barVal')
+    const count = ref(0)
+    const onClick = () => {
+      count.value++
+      console.log(count.value)
+    }
+    return {
+      count,
+      onClick,
+    }
   },
 }
