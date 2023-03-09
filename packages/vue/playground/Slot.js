@@ -1,9 +1,9 @@
-import { h } from '../dist/index.mjs'
+import { Fragment, h } from '../dist/index.mjs'
 export const Slot = {
   props: {
   },
   render() {
-    return h('div', {}, [this.$slots.header(), this.$slots.body(), this.$slots.footer()])
+    return h(Fragment, {}, [this.$slots.header({ age: 1 }), this.$slots.body({ age: 2 }), this.$slots.footer({ age: 3 })])
   },
   setup() {
     return {
