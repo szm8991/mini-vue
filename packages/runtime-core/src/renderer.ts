@@ -109,6 +109,7 @@ export function createRenderer(options: any) {
       mountChildren(n2.children, container)
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
+    instance.mounted && instance.mounted.forEach(hook => hook.call(instance.proxy))
     const subTree = instance.subTree = instance.render.call(instance.proxy) // instance.render(instance.setupState || {})
     patch(null, subTree, container)
     // 把 root element 赋值给 组件的vnode.el ，为后续调用 $el 的时候获取值

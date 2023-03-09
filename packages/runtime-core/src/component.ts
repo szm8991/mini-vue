@@ -3,7 +3,21 @@ import { emit } from './componentEmits'
 import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 import { initSlots } from './componentSlots'
+let currentInstance: any = null
+// 这个接口暴露给用户，用户可以在 setup 中获取组件实例 instance
+export function getCurrentInstance(): any {
+  return currentInstance
+}
 
+export function setCurrentInstance(instance) {
+  currentInstance = instance
+}
+export function onMounted(fn) {
+  if (currentInstance)
+    currentInstance.mounted.push(fn)
+  else
+    console.warn('onMounted only called in setup')
+}
 export function createComponentInstance(vnode, parent) {
   const instance = {
     type: vnode.type,
@@ -19,6 +33,7 @@ export function createComponentInstance(vnode, parent) {
     ctx: {}, // context 对象
     setupState: {}, // 存储 setup 的返回值
     emit: () => {},
+    mounted: [], // 存储mounted生命周期函数
   }
 
   // 在 prod 坏境下的 ctx 只是下面简单的结构
@@ -48,8 +63,10 @@ function setupStatefulComponent(instance) {
   const Component = instance.type
   const { setup } = Component
   if (setup) {
+    setCurrentInstance(instance)
     const setupContext = createSetupContext(instance)
     const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    setCurrentInstance(null)
     handleSetupResult(instance, setupResult)
   }
   else {
