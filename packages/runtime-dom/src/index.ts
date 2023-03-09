@@ -1,5 +1,5 @@
 import { createRenderer } from '@ming/runtime-core'
-import { normalizeClass, shouldSetAsProps } from '@ming/shared'
+import { isArray, normalizeClass, shouldSetAsProps } from '@ming/shared'
 // element节点
 function createElement(tag) {
   return document.createElement(tag)
@@ -31,14 +31,20 @@ function patchProp(el, key, preValue, nextValue) {
   if (/^on[A-Z]/.test(key)) {
     // 通过额外属性存储事件函数，不需要addEventListener和removeEventListener了
     const invokers = el._vei || (el._vei = {})
-    const invoker = invokers[key]
+    let invoker = invokers[key]
     const eventName = key.slice(2).toLowerCase()
     if (nextValue && invoker) {
       invoker.value = nextValue
     }
     else {
       if (nextValue) {
-        const invoker = (invokers[key] = nextValue)
+        invoker = invokers[key] = (e) => {
+          if (isArray(invoker.value))
+            invoker.value.forEach(fn => fn(e))
+          else
+            invoker.value(e)
+        }
+        invoker.value = nextValue
         el.addEventListener(eventName, invoker)
       }
       else {

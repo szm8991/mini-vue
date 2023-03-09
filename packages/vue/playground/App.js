@@ -6,9 +6,10 @@ export const App = {
     return h('h1', {
       id: 'root',
       class: ['foo', 'bar'],
-      onClick() {
-        console.log('click')
-      },
+      onClick: [
+        () => console.log('click1'),
+        () => console.log('click2'),
+      ],
     },
     `hello,${this.msg}`,
     // [

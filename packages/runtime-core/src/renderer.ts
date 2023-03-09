@@ -28,6 +28,10 @@ export function createRenderer(options: any) {
     else hostClear(vnode.el)
   }
   function patch(n1, n2, container = null, anchor = null, parentComponent = null) {
+    if (n1 && n1.type !== n2.type) {
+      unmount(n1)
+      n1 = null
+    }
     // n1-旧的vnode，n2-新的vnode
     const { type, shapeFlag } = n2
     switch (type) {
