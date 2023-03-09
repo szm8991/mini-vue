@@ -1,36 +1,14 @@
 import { h } from '../dist/index.mjs'
-import { Prop } from './Prop.js'
-window.self = null
+import { Emit } from './Emit.js'
 export const App = {
-  render(state) {
-    window.self = this
-    return h('h1', {
-      id: 'root',
-      class: ['foo', 'bar'],
-      onClick: [
-        () => console.log('click1'),
-        () => console.log('click2'),
-      ]
-      ,
-    },
-    [h(Prop, { count: 1, title: 'attrs' })],
-    // [
-    //   h('div', {
-    //     onClick() {
-    //       console.log('div1')
-    //     },
-    //   }, 'div1'),
-    // ],
-    // `hello,${this.msg}`,
-    // [
-    //   h('div', { class: 'red' }, 'div1'),
-    //   h('div', { class: 'blue' }, 'div2'),
-    // ]
-    )
+  name: 'app',
+  render() {
+    return h('h1', {}, [h(Emit, {
+      onAdd(a, b) {
+        console.log('on emit add', a, b)
+      },
+    })])
   },
   setup() {
-    return {
-      msg: 'world',
-    }
   },
 }

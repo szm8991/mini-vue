@@ -26,5 +26,16 @@ export const isSet = (val: unknown): val is Set<any> =>
 export const isArray = Array.isArray
 export const isObject = (val: unknown): val is Record<any, any> =>
   val !== null && typeof val === 'object'
+
+const camelizeRE = /-(\w)/g
+export const camelize = (str: string): string => {
+  return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''))
+}
+
+export const capitalize = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1)
+
+export const toHandlerKey = (str: string) =>
+  str ? `on${capitalize(str)}` : ''
 export * from './normalizeProp'
 export * from './shapeFLags'

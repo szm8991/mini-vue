@@ -1,5 +1,6 @@
 import { proxyRefs, shallowReadonly } from '@ming/reactive'
-import { initProps } from './componentProsp'
+import { emit } from './componentEmits'
+import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 
 export function createComponentInstance(vnode, parent) {
@@ -25,6 +26,7 @@ export function createComponentInstance(vnode, parent) {
     _: instance,
   }
 
+  instance.emit = emit.bind(null, instance) as any
   return instance
 }
 
@@ -33,12 +35,20 @@ export function setupComponent(instance) {
   // initSlots(instance, children);
   setupStatefulComponent(instance)
 }
+function createSetupContext(instance) {
+  return {
+    attrs: instance.attrs,
+    slots: instance.slots,
+    emit: instance.emit,
+  }
+}
 function setupStatefulComponent(instance) {
   instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers)
   const Component = instance.type
   const { setup } = Component
   if (setup) {
-    const setupResult = setup(shallowReadonly(instance.props))
+    const setupContext = createSetupContext(instance)
+    const setupResult = setup(shallowReadonly(instance.props), setupContext)
     handleSetupResult(instance, setupResult)
   }
   else {
