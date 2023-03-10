@@ -116,10 +116,11 @@ export function createRenderer(options: any) {
       }
       else {
         // old not text vs new not text
-        patchKeyedChildren(c1, c2, container, parentComponent, anchor)
+        patchKeyedChildren(c1, c2, container, anchor, parentComponent)
       }
     }
   }
+
   function patchKeyedChildren(
     c1: any[],
     c2: any[],
@@ -127,9 +128,145 @@ export function createRenderer(options: any) {
     parentAnchor,
     parentComponent,
   ) {
-    // todo diff
+    // noDiff(c1, c2, container, parentAnchor, parentComponent)
+    edgeDiff(c1, c2, container, parentAnchor, parentComponent)
+    // quickDiff(c1, c2, container, parentAnchor, parentComponent)
+  }
+  // 暴力不diff
+  function noDiff(
+    c1: any[],
+    c2: any[],
+    container,
+    parentAnchor,
+    parentComponent) {
     c1.forEach(c => unmount(c))
     mountChildren(c2, container, parentComponent)
+  }
+  // 双端对比diff
+  function edgeDiff(
+    c1: any[],
+    c2: any[],
+    container,
+    parentAnchor,
+    parentComponent) {
+    let oldStartIdx = 0
+    let oldEndIdx = c1.length - 1
+    let newStartIdx = 0
+    let newEndIdx = c2.length - 1
+    let oldStartVnode = c1[oldStartIdx]
+    let oldEndVnode = c1[oldEndIdx]
+    let newStartVnode = c2[newStartIdx]
+    let newEndVnode = c2[newEndIdx]
+    const isSameVNodeType = (n1, n2) => {
+      return n1.type === n2.type && n1.key === n2.key
+    }
+    while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+      // 为undefined说明已经处理过了
+      if (!oldStartVnode) {
+        oldStartVnode = c1[++oldStartIdx]
+      }
+      else if (!oldEndVnode) {
+        oldEndVnode = c1[--oldEndIdx]
+      }
+      // 左-左对上了
+      else if (isSameVNodeType(newStartVnode, oldStartVnode)) {
+        patch(oldStartVnode, newStartVnode, container, parentAnchor, parentComponent)
+        oldStartVnode = c1[++oldStartIdx]
+        newStartVnode = c2[++newStartIdx]
+      }
+      // 右-右对上了
+      else if (isSameVNodeType(newEndVnode, oldEndVnode)) {
+        patch(oldEndVnode, newEndVnode, container, parentAnchor, parentComponent)
+        oldEndVnode = c1[--oldEndIdx]
+        newEndVnode = c2[--newEndIdx]
+      }
+      // 左-右对上了
+      else if (isSameVNodeType(newStartIdx, oldEndIdx)) {
+        patch(oldEndVnode, newStartVnode, container, parentAnchor, parentComponent)
+        hostInsert(oldEndVnode.el, container, oldStartVnode.el)
+        oldEndVnode = c1[--oldEndIdx]
+        newStartVnode = c2[++newStartIdx]
+      }
+      // 右-左对上了
+      else if (isSameVNodeType(newEndIdx, oldStartIdx)) {
+        patch(oldStartVnode, newEndVnode, container, parentAnchor, parentComponent)
+        hostInsert(oldStartVnode.el, container, oldEndVnode.el.nextSibling)
+        oldStartVnode = c1[++oldStartIdx]
+        newEndVnode = c2[--newEndIdx]
+      }
+      // 双端对不上的
+      else {
+        const idxInOld = c1.findIndex(node => isSameVNodeType(newStartVnode, node))
+        // 找到了可复用的
+        if (idxInOld > 0) {
+          const vnodeToMove = c1[idxInOld]
+          patch(vnodeToMove, newStartVnode, container, parentAnchor, parentComponent)
+          hostInsert(vnodeToMove.el, container, oldStartVnode.el)
+          c1[idxInOld] = undefined
+        }
+        // 没找到
+        else {
+          patch(null, newStartVnode, container, oldStartVnode.el, parentComponent)
+        }
+        newStartVnode = c2[++newStartIdx]
+      }
+    }
+    // 边缘情况处理，多的删了，少的加上
+    if (oldEndIdx < oldStartIdx && newStartIdx <= newEndIdx) {
+      for (let i = newStartIdx; i <= newEndIdx; i++)
+        patch(null, c2[i], container, oldStartVnode.el, parentComponent)
+    }
+    else if (newEndIdx < newStartIdx && oldStartIdx <= oldEndIdx) {
+      for (let i = oldStartIdx; i <= oldEndIdx; i++)
+        unmount(c1[i])
+    }
+  }
+  // 快速对比diff
+  function quickDiff(
+    c1: any[],
+    c2: any[],
+    container,
+    parentAnchor,
+    parentComponent) {
+    // todo
+  }
+  function getLIS(arr: number[]): number[] {
+    const p = arr.slice()
+    const result = [0]
+    let i, j, u, v, c
+    const len = arr.length
+    for (i = 0; i < len; i++) {
+      const arrI = arr[i]
+      if (arrI !== 0) {
+        j = result[result.length - 1]
+        if (arr[j] < arrI) {
+          p[i] = j
+          result.push(i)
+          continue
+        }
+        u = 0
+        v = result.length - 1
+        while (u < v) {
+          c = (u + v) >> 1
+          if (arr[result[c]] < arrI)
+            u = c + 1
+          else
+            v = c
+        }
+        if (arrI < arr[result[u]]) {
+          if (u > 0)
+            p[i] = result[u - 1]
+          result[u] = i
+        }
+      }
+    }
+    u = result.length
+    v = result[u - 1]
+    while (u-- > 0) {
+      result[u] = v
+      v = p[v]
+    }
+    return result
   }
   function mountChildren(children, container, parentComponent) {
     children.forEach((child) => {
