@@ -1,14 +1,9 @@
 import { h, ref } from '../dist/index.mjs'
+import { Update } from './Update.js'
 export const App = {
   name: 'app',
-  props: {
-    foo: String,
-  },
   render() {
-    return h('div', { foo: this.foo }, [
-      h('div', {}, `foo:${this.foo}`),
-      h('button', { onClick: this.changeProp }, 'prop change'),
-    ])
+    return h(Update, { foo: this.foo, onChangeProp: this.changeProp })
   },
   setup() {
     const foo = ref('foo')

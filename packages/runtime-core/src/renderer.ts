@@ -1,6 +1,7 @@
 import { effect } from '@ming/reactive'
 import { ShapeFlags } from '@ming/shared'
 import { createComponentInstance, setupComponent } from './component'
+import { shouldUpdateComponent } from './componentRenderUtils'
 import { createAppAPI } from './createApp'
 import { queueJob } from './scheduler'
 import { Fragment, Text } from './vnode'
@@ -73,18 +74,36 @@ export function createRenderer(options: any) {
   }
   function updateElement(n1: any, n2: any, container: any, anchor: any, parentComponent: any) {
     const el = (n2.el = n1.el)
-    // patchProps()
+    const oldProps = (n1 && n1.props) || {}
+    const newProps = n2.props || {}
+    patchProps(el, oldProps, newProps)
     patchChildren(n1, n2, el, anchor, parentComponent)
+  }
+  function patchProps(el, oldProps, newProps) {
+    // prop changed
+    for (const key in newProps) {
+      const prevProp = oldProps[key]
+      const nextProp = newProps[key]
+      if (prevProp !== nextProp)
+        hostPatchProp(el, key, prevProp, nextProp)
+    }
+    // prop deleted
+    for (const key in oldProps) {
+      const prevProp = oldProps[key]
+      if (!(key in newProps))
+        hostPatchProp(el, key, prevProp, null)
+    }
   }
   function patchChildren(n1, n2, container, anchor, parentComponent) {
     const { shapeFlag: prevShapeFlag, children: c1 } = n1
     const { shapeFlag, children: c2 } = n2
-    // old all patch new text
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-      if (c2 !== c1) {
-        hostClear(container)
+      // old array patch new text
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN)
+        c1.forEach(c => unmount(c))
+      // old text patch new text
+      else if (c2 !== c1)
         hostSetElementText(container, c2 as string)
-      }
     }
     else {
       // old text vs new not text
@@ -119,7 +138,17 @@ export function createRenderer(options: any) {
       updateComponent(n1, n2, container)
   }
   function updateComponent(n1, n2, container) {
-
+    const instance = (n2.component = n1.component)
+    // 先看看这个组件是否应该更新
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    }
+    else {
+      n2.component = n1.component
+      n2.el = n1.el
+      instance.vnode = n2
+    }
   }
   function mountComponent(vnode, container, parentComponent) {
     const instance = (vnode.component = createComponentInstance(
@@ -147,17 +176,26 @@ export function createRenderer(options: any) {
       patchChildren(n1.children, n2.children, container, null, parentComponent)
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
-    effect(() => {
-      const subTree = instance.subTree = instance.render.call(instance.proxy) // instance.render(instance.setupState || {})
+    instance.update = effect(() => {
       if (!instance.isMounted) {
+        const subTree = instance.subTree = instance.render.call(instance.proxy, instance.proxy) // instance.render(instance.setupState || {})
         patch(null, subTree, container, null, instance)
-        instance.mounted && instance.mounted.forEach(hook => hook.call(instance.proxy))
+        instance.mounted && instance.mounted.forEach(hook => hook.call(instance.proxy, instance.proxy))
         // 把 root element 赋值给 组件的vnode.el ，为后续调用 $el 的时候获取值
         vnode.el = subTree.el
         instance.isMounted = true
       }
       else {
         console.log('update')
+        const { next, vnode } = instance
+
+        // 如果有 next 的话， 说明需要更新组件的数据（props，slots 等）
+        // 先更新组件的数据，然后更新完成后，在继续对比当前组件的子元素
+        if (next) {
+          // 问题是 next 和 vnode 的区别是什么
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
         const newTree = instance.render.call(instance.proxy)
         const oldTree = instance.subTree
         instance.subTree = newTree
@@ -166,6 +204,13 @@ export function createRenderer(options: any) {
     }, {
       scheduler: queueJob,
     })
+  }
+  function updateComponentPreRender(instance, nextVNode) {
+    nextVNode.component = instance
+    instance.vnode = nextVNode
+    instance.next = null
+    const { props } = nextVNode
+    instance.props = props
   }
   return { render, createApp: createAppAPI(render) }
 }
