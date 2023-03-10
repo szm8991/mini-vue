@@ -129,8 +129,8 @@ export function createRenderer(options: any) {
     parentComponent,
   ) {
     // noDiff(c1, c2, container, parentAnchor, parentComponent)
-    edgeDiff(c1, c2, container, parentAnchor, parentComponent)
-    // quickDiff(c1, c2, container, parentAnchor, parentComponent)
+    // edgeDiff(c1, c2, container, parentAnchor, parentComponent)
+    quickDiff(c1, c2, container, parentAnchor, parentComponent)
   }
   // 暴力不diff
   function noDiff(
@@ -228,7 +228,122 @@ export function createRenderer(options: any) {
     container,
     parentAnchor,
     parentComponent) {
-    // todo
+    // 指向新旧两组子节点的开头
+    let j = 0
+    let oldVNode = c1[j]
+    let newVNode = c2[j]
+    const isSameVNodeType = (n1, n2) => {
+      return n1.type === n2.type && n1.key === n2.key
+    }
+    // 先从头找直到不一样——左左对比
+    while (isSameVNodeType(newVNode, oldVNode)) {
+      patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
+      j++
+      oldVNode = c1[j]
+      newVNode = c2[j]
+    }
+    let oldEnd = c1.length - 1
+    let newEnd = c2.length - 1
+    oldVNode = c1[oldEnd]
+    newVNode = c2[newEnd]
+    // 再从后找直到不一样——右右对比
+    while (isSameVNodeType(newVNode, oldVNode)) {
+      patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
+      oldEnd--
+      newEnd--
+      oldVNode = c1[oldEnd]
+      newVNode = c2[newEnd]
+    }
+    // 旧的遍历完了，新的还有，j到newEnd的应该作为新节点插入
+    if (j > oldEnd && j <= newEnd) {
+      const anchorIndex = newEnd + 1
+      const anchor = anchorIndex < c2.length ? c2[anchorIndex].el : parentAnchor
+      while (j <= newEnd)
+        patch(null, c2[j++], container, anchor, parentComponent)
+    }
+    // 新的遍历完了，老的还有，j到oldEnd的应该卸载
+    else if (j > newEnd && j <= oldEnd) {
+      while (j <= oldEnd)
+        unmount(c1[j++])
+    }
+    // 需要移动
+    else {
+      const count = newEnd - j + 1
+      const sources = new Array(count).fill(-1)
+      const oldStart = j
+      const newStart = j
+      // 双循环，性能差，建议打表
+      // for (let i = oldStart; i <= oldEnd; i++) {
+      //   oldVNode = c1[i]
+      //   for (let k = newStart; k <= newEnd; k++) {
+      //     newVNode = c2[k]
+      //     if (isSameVNodeType(newVNode, oldVNode)) {
+      //       patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
+      //       source[k - newStart] = i
+      //     }
+      //   }
+      // }
+      // 找能复用的，先patch，后移动
+      const keyIndex: any[] = []
+      let moved = false
+      let pos = 0
+      for (let i = newStart; i <= newEnd; i++)
+        keyIndex[c2[i].key] = i
+      let patched = 0
+      for (let i = oldStart; i <= oldEnd; i++) {
+        oldVNode = c1[i]
+        if (patched <= count) {
+          const k = keyIndex[oldVNode.key]
+          if (typeof k !== 'undefined') {
+            newVNode = c2[k]
+            patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
+            patched++
+            sources[k - newStart] = i
+            if (k < pos) {
+              // 需要移动
+              moved = true
+            }
+            else {
+              pos = k
+            }
+          }
+          else {
+            unmount(oldVNode)
+          }
+        }
+        else {
+          unmount(oldVNode)
+        }
+      }
+      // 需要移动
+      if (moved) {
+        const seq = getLIS(sources)
+        // 最长key递增子序列最后一个元素
+        let s = seq.length - 1
+        // 新子节点数组第最后一个元素
+        let i = count - 1
+        for (i; i >= 0; i--) {
+          if (sources[i] === -1) {
+            // 是新节点，要挂载
+            const pos = i + newStart
+            newVNode = c2[pos]
+            const anchor = pos + 1 < c2.length ? c2[pos + 1].el : null
+            patch(null, newVNode, container, anchor, parentComponent)
+          }
+          else if (i !== seq[s]) {
+            // i位置的新子节点需要移动
+            const pos = i + newStart
+            newVNode = c2[pos]
+            const anchor = pos + 1 < c2.length ? c2[pos + 1].el : null
+            hostInsert(newVNode.el, container, anchor)
+          }
+          else {
+            // i位置的新子节点不需要移动
+            s--
+          }
+        }
+      }
+    }
   }
   function getLIS(arr: number[]): number[] {
     const p = arr.slice()
