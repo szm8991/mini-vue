@@ -230,24 +230,28 @@ export function createRenderer(options: any) {
     parentComponent) {
     // 指向新旧两组子节点的开头
     let j = 0
+    let oldEnd = c1.length - 1
+    let newEnd = c2.length - 1
     let oldVNode = c1[j]
     let newVNode = c2[j]
     const isSameVNodeType = (n1, n2) => {
       return n1.type === n2.type && n1.key === n2.key
     }
     // 先从头找直到不一样——左左对比
-    while (isSameVNodeType(newVNode, oldVNode)) {
+    while (j <= oldEnd && j <= newEnd) {
+      if (!isSameVNodeType(newVNode, oldVNode))
+        break
       patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
       j++
       oldVNode = c1[j]
       newVNode = c2[j]
     }
-    let oldEnd = c1.length - 1
-    let newEnd = c2.length - 1
     oldVNode = c1[oldEnd]
     newVNode = c2[newEnd]
     // 再从后找直到不一样——右右对比
-    while (isSameVNodeType(newVNode, oldVNode)) {
+    while (j <= oldEnd && j <= newEnd) {
+      if (!isSameVNodeType(newVNode, oldVNode))
+        break
       patch(oldVNode, newVNode, container, parentAnchor, parentComponent)
       oldEnd--
       newEnd--
