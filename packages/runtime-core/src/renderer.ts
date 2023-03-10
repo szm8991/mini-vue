@@ -462,7 +462,6 @@ export function createRenderer(options: any) {
       }
     }, {
       scheduler() {
-        console.log('update scheduler')
         queueJob(instance.update)
       },
     })
