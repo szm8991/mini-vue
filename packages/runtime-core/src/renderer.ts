@@ -430,7 +430,7 @@ export function createRenderer(options: any) {
     if (!n1)
       mountChildren(n2.children, container, parentComponent)
     else
-      patchChildren(n1.children, n2.children, container, null, parentComponent)
+      patchChildren(n1, n2, container, null, parentComponent)
   }
   function setupRenderEffect(instance: any, vnode: any, container: any) {
     instance.update = effect(() => {
@@ -457,7 +457,10 @@ export function createRenderer(options: any) {
         patch(oldTree, newTree, oldTree.el, null, instance)
       }
     }, {
-      scheduler: queueJob,
+      scheduler() {
+        console.log('update scheduler')
+        queueJob(instance.update)
+      },
     })
   }
   function updateComponentPreRender(instance, nextVNode) {
