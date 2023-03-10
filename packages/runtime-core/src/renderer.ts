@@ -99,11 +99,14 @@ export function createRenderer(options: any) {
     const { shapeFlag, children: c2 } = n2
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       // old array patch new text
-      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN)
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         c1.forEach(c => unmount(c))
-      // old text patch new text
-      else if (c2 !== c1)
         hostSetElementText(container, c2 as string)
+      }
+      // old text patch new text
+      else if (c2 !== c1) {
+        hostSetElementText(container, c2 as string)
+      }
     }
     else {
       // old text vs new not text
@@ -125,6 +128,8 @@ export function createRenderer(options: any) {
     parentComponent,
   ) {
     // todo diff
+    c1.forEach(c => unmount(c))
+    mountChildren(c2, container, parentComponent)
   }
   function mountChildren(children, container, parentComponent) {
     children.forEach((child) => {
@@ -186,9 +191,7 @@ export function createRenderer(options: any) {
         instance.isMounted = true
       }
       else {
-        console.log('update')
         const { next, vnode } = instance
-
         // 如果有 next 的话， 说明需要更新组件的数据（props，slots 等）
         // 先更新组件的数据，然后更新完成后，在继续对比当前组件的子元素
         if (next) {

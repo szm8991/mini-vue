@@ -1,24 +1,11 @@
-import { h, ref } from '../dist/index.mjs'
+import { Fragment, h } from '../dist/index.mjs'
+import { ArrayToText } from './ArrayToText.js'
 export const App = {
   name: 'app',
-  props: {
-    foo: String,
-  },
   render() {
-    return h('div', { foo: this.foo }, [
-      h('div', {}, `foo:${this.foo}`),
-      h('button', { onClick: this.changeProp }, 'prop change'),
-    ])
+    return h(Fragment, { }, [h(ArrayToText), {}])
   },
   setup() {
-    const foo = ref('foo')
-    const changeProp = () => {
-      console.log('changeProp')
-      foo.value = 'another foo'
-    }
-    return {
-      foo,
-      changeProp,
-    }
+
   },
 }
