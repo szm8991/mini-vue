@@ -1,52 +1,24 @@
-import { parse, dump, transform, dumpEnterandExit, union } from '../src'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { dump, dumpEnterandExit, parse, transform, union } from '../src'
+import { generate } from '../src/codegen'
 describe('tokenzie', () => {
-  it('parse <div><p>Vue</p><p>Template</p></div>', () => {
-    const ast = parse('<div><p>Vue</p><p>Template</p></div>')
-    expect(ast).toMatchInlineSnapshot(`
-      {
-        "children": [
-          {
-            "children": [
-              {
-                "children": [
-                  {
-                    "content": "Vue",
-                    "type": "Text",
-                  },
-                ],
-                "tag": "p",
-                "type": "Element",
-              },
-              {
-                "children": [
-                  {
-                    "content": "Template",
-                    "type": "Text",
-                  },
-                ],
-                "tag": "p",
-                "type": "Element",
-              },
-            ],
-            "tag": "div",
-            "type": "Element",
-          },
-        ],
-        "type": "Root",
-      }
-    `)
-  })
   it('test dump output', () => {
     const ast = parse('<div><p>Vue</p><p>Template</p></div>')
-    console.log('origin')
+    console.log('----------------------------origin--------------------------------')
     dump(ast)
   })
-  it('test transform output', () => {
+  it('test jsNode output', () => {
     const ast = parse('<div><p>Vue</p><p>Template</p></div>')
-    console.log('transform')
+    console.log('--------------------------transform----------------------------------')
     transform(ast)
+    const code = generate(ast.jsNode)
+    expect(code).toMatchInlineSnapshot(`
+      "function render(){
+        return h('div', [h('p', 'Vue'), h('p', 'Template')])
+      }"
+    `)
   })
+
   it('test enter and exit output', () => {
     dumpEnterandExit()
     expect(union).toMatchInlineSnapshot(`

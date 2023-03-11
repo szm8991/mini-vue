@@ -1,9 +1,10 @@
-import { tokenzie } from './tokenzie'
+import { tokenzie } from './tokenzie.js'
 export interface NodeType {
   type: string
   tag?: string | undefined
   content?: string | undefined
   children?: NodeType[]
+  jsNode?: any
 }
 export function parse(str) {
   const tokens = tokenzie(str)
@@ -59,6 +60,7 @@ function traverseNode(ast: NodeType, context: TransformContext) {
     const onExit = transforms[i](context.currentNode, context)
     if (onExit)
       exitFns.push(onExit)
+
     if (!context.currentNode)
       return
   }
@@ -103,7 +105,7 @@ export function transform(ast: NodeType) {
       if (context.parent)
         context.parent.children?.push(node)
     },
-    nodeTransforms: [transformElement, transformText],
+    nodeTransforms: [transformRoot, transformElement, transformText],
   }
   traverseNode(ast, context)
   dump(ast)
@@ -131,18 +133,47 @@ export function dumpEnterandExit(ast: NodeType = { type: 'Root', children: [] })
   }
   traverseNode(ast, context)
 }
+function transformRoot(node: NodeType): void | (() => void) {
+  return () => {
+    if (node.type !== 'Root')
+      return
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const vnodeJSAST = node.children[0].jsNode
+    node.jsNode = {
+      type: 'FunctionDecl',
+      id: { type: 'Identifier', name: 'render' },
+      params: [],
+      body: [
+        {
+          type: 'ReturnStatement',
+          return: vnodeJSAST,
+        },
+      ],
+    }
+    // console.log(node.jsNode)
+  }
+}
 function transformElement(node: NodeType): void | (() => void) {
-  if (node.type === 'Element' && node.tag === 'p')
-    node.tag = 'h1'
+  return () => {
+    if (node.type !== 'Element')
+      return
+    const calleeExp = createCallExpression('h', [
+      createStringLiteral(node.tag),
+    ])
+    node.children?.length === 1
+      ? calleeExp.arguments.push(node.children[0].jsNode)
+      : calleeExp.arguments.push(createArrayExpression(node.children?.map(c => c.jsNode)))
+
+    node.jsNode = calleeExp
+    // console.log(node.jsNode)
+  }
 }
 function transformText(node: NodeType, context: TransformContext): void | (() => void) {
-  if (node.type === 'Text') {
-    // context.removeNode()
-    context.replaceNode({
-      type: 'Element',
-      tag: 'span',
-    })
-  }
+  if (node.type !== 'Text')
+    return
+  node.jsNode = createStringLiteral(node.content)
+  // console.log(node.jsNode)
 }
 export const union: string[] = []
 function transformA(node: NodeType, context: TransformContext): void | (() => void) {
@@ -152,4 +183,29 @@ function transformA(node: NodeType, context: TransformContext): void | (() => vo
 function transformB(node: NodeType, context: TransformContext): void | (() => void) {
   union.push('transformB进入阶段执行')
   return () => union.push('transformB退出阶段执行')
+}
+function createStringLiteral(value) {
+  return {
+    type: 'StringLiteral',
+    value,
+  }
+}
+function createIdentifier(name) {
+  return {
+    type: 'Identifier',
+    name,
+  }
+}
+function createArrayExpression(elements) {
+  return {
+    type: 'ArrayExpression',
+    elements,
+  }
+}
+function createCallExpression(callee, args) {
+  return {
+    type: 'CallExpression',
+    callee: createIdentifier(callee),
+    arguments: args,
+  }
 }
