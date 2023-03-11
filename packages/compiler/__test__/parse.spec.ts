@@ -14,7 +14,7 @@ describe('tokenzie', () => {
     const code = generate(ast.jsNode)
     expect(code).toMatchInlineSnapshot(`
       "function render(){
-        return h('div', [h('p', 'Vue'), h('p', 'Template')])
+        return h('div', {}, [h('p', {}, 'Vue'), h('p', {}, 'Template')])
       }"
     `)
   })

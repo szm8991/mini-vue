@@ -39,10 +39,14 @@ function genNode(node: any, context: any) {
       genArrayExpression(node, context)
       break
     default:
+      genEmpty(node, context)
       break
   }
 }
-
+function genEmpty(_, context) {
+  const { push } = context
+  push('{}')
+}
 function genNodeList(nodes, context) {
   const { push } = context
   for (let i = 0; i < nodes.length; i++) {

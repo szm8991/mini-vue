@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest'
 import { tokenzie } from '../src'
-import { describe, it, expect } from 'vitest'
 describe('tokenzie', () => {
   it('tokenzied tag', () => {
     const tokens = tokenzie('<p>')

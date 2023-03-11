@@ -160,6 +160,8 @@ function transformElement(node: NodeType): void | (() => void) {
       return
     const calleeExp = createCallExpression('h', [
       createStringLiteral(node.tag),
+      // props
+      {},
     ])
     node.children?.length === 1
       ? calleeExp.arguments.push(node.children[0].jsNode)
