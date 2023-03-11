@@ -230,7 +230,7 @@ function parseComment(context) {
   }
 }
 
-export function parseTemplate(str: string) {
+export function templateParse(str: string) {
   const context = createParserContext(str)
   return createRoot(parseChildren(context, []))
 }

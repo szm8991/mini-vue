@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { parseTemplate } from '../src/parseTemplate'
+import { templateParse } from '../src/templateParse'
 describe('tokenzie', () => {
   it('parse props', () => {
-    const ast = parseTemplate('<div :id="dynamicId"   @click="handler"  v-on:mousedown="onMouseDonw"></div>')
+    const ast = templateParse('<div :id="dynamicId"   @click="handler"  v-on:mousedown="onMouseDonw"></div>')
     expect(ast).toMatchInlineSnapshot(`
       {
         "children": [
@@ -35,7 +35,7 @@ describe('tokenzie', () => {
     `)
   })
   it('parse text', () => {
-    const ast = parseTemplate('<div>Text</div>')
+    const ast = templateParse('<div>Text</div>')
     expect(ast).toMatchInlineSnapshot(`
       {
         "children": [
@@ -57,7 +57,7 @@ describe('tokenzie', () => {
     `)
   })
   it('parse interpolation', () => {
-    const ast = parseTemplate('<div>foo {{ bar }} baz</div>')
+    const ast = templateParse('<div>foo {{ bar }} baz</div>')
     expect(ast).toMatchInlineSnapshot(`
       {
         "children": [
@@ -90,7 +90,7 @@ describe('tokenzie', () => {
     `)
   })
   it('parse comment', () => {
-    const ast = parseTemplate('<div><!-- comments --> hello </div>')
+    const ast = templateParse('<div><!-- comments --> hello </div>')
     expect(ast).toMatchInlineSnapshot(`
       {
         "children": [
