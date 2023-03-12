@@ -455,7 +455,7 @@ export function createRenderer(options: any) {
           next.el = vnode.el
           updateComponentPreRender(instance, next)
         }
-        const newTree = instance.render.call(instance.proxy)
+        const newTree = instance.render.call(instance.proxy, instance.proxy)
         const oldTree = instance.subTree
         instance.subTree = newTree
         patch(oldTree, newTree, oldTree.el, null, instance)

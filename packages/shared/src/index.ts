@@ -39,3 +39,4 @@ export const toHandlerKey = (str: string) =>
   str ? `on${capitalize(str)}` : ''
 export * from './normalizeProp'
 export * from './shapeFLags'
+export * from './toDisplayString'

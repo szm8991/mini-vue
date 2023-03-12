@@ -85,8 +85,20 @@ function handleSetupResult(instance: any, setupResult: any) {
 
   finishComponentSetup(instance)
 }
+let compiler
+export function registerRuntimeCompiler(_compiler) {
+  compiler = _compiler
+}
 function finishComponentSetup(instance: any) {
   const Component = instance.type
-  if (!instance.render)
+  if (!instance.render) {
+    if (compiler && !Component.render) {
+      if (Component.template) {
+        // 这里就是 runtime 模块和 compile 模块结合点
+        const template = Component.template
+        Component.render = compiler(template)
+      }
+    }
     instance.render = Component.render
+  }
 }

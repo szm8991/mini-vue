@@ -1,17 +1,11 @@
-import { Fragment, h } from '../dist/index.mjs'
-// import { ArrayToText } from './ArrayToText.js'
-// import { TextToArray } from './TextToArray.js'
-import { ArrayToArray } from './ArrayToArray.js'
+import { ref } from '../dist/index.mjs'
 export const App = {
   name: 'app',
-  render() {
-    return h(Fragment, { }, [
-      // h(ArrayToText, {}),
-      // h(TextToArray, {}),
-      h(ArrayToArray, {}),
-    ])
-  },
+  template: '<div>countVal: {{count}}</div>',
   setup() {
-
+    const count = globalThis.count = ref(1)
+    return {
+      count,
+    }
   },
 }

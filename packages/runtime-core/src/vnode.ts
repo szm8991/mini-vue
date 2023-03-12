@@ -1,5 +1,4 @@
 import { ShapeFlags, isArray, isObject, isString } from '@ming/shared'
-
 function getShapeFlag(type: any) {
   return typeof type === 'string'
     ? ShapeFlags.ELEMENT
@@ -48,3 +47,4 @@ export function normalizeSlotChildren(vnode, children) {
 export function createTextVNode(text = ' ') {
   return createVNode(Text, {}, text)
 }
+export { createVNode as createElementVNode }
