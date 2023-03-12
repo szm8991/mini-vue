@@ -8,7 +8,10 @@ describe('condegen', () => {
     const ast = templateParse('hi')
     templateTransform(ast)
     const { code } = templateCodegen(ast)
-    expect(code).toMatchInlineSnapshot('"function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return \'hi\'}"')
+    expect(code).toMatchInlineSnapshot(`
+      "
+      return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return 'hi'}"
+    `)
   })
   it('Interpolation', () => {
     const ast = templateParse('{{hello}}')
@@ -17,6 +20,12 @@ describe('condegen', () => {
     })
 
     const { code } = templateCodegen(ast)
-    expect(code).toMatchInlineSnapshot('"function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _toDisplayString(_ctx.hello)}"')
+    expect(code).toMatchInlineSnapshot(`
+      "
+      const { toDisplayString : _toDisplayString} = Vue 
+      
+            
+      return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _toDisplayString(_ctx.hello)}"
+    `)
   })
 })

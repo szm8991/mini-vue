@@ -20,6 +20,7 @@ function createRoot(children) {
   return {
     type: 'Root',
     children,
+    helpers: [],
   }
 }
 function createParserContext(str) {

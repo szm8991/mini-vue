@@ -30,6 +30,7 @@ describe('tokenzie', () => {
             "type": "Element",
           },
         ],
+        "helpers": [],
         "type": "Root",
       }
     `)
@@ -52,6 +53,7 @@ describe('tokenzie', () => {
             "type": "Element",
           },
         ],
+        "helpers": [],
         "type": "Root",
       }
     `)
@@ -85,6 +87,7 @@ describe('tokenzie', () => {
             "type": "Element",
           },
         ],
+        "helpers": [],
         "type": "Root",
       }
     `)
@@ -114,6 +117,7 @@ describe('tokenzie', () => {
             "type": "Element",
           },
         ],
+        "helpers": [],
         "type": "Root",
       }
     `)

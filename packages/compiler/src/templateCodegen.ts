@@ -35,12 +35,11 @@ export function templateCodegen(node: any, options = {}) {
   const context = createCodegenContext(node, options)
   const { push, mode } = context
 
-  if (mode === 'module') {
-    // genModulePreamble(ast, context);
-  }
-  else {
-    // genFunctionPreamble(ast, context);
-  }
+  if (mode === 'module')
+    genModulePreamble(node, context)
+  else
+    genFunctionPreamble(node, context)
+
   const functionName = 'render'
 
   const args = ['_ctx', '_cache', '$props', '$setup', '$data', '$options']
@@ -90,49 +89,42 @@ function genEmpty(_, context) {
   const { push } = context
   push('{}')
 }
-function genNodeList(nodes, context) {
-  const { push } = context
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-    genNode(node, context)
-    if (i < nodes.length - 1)
-      push(', ')
+function genModulePreamble(ast, context) {
+  // preamble 就是 import 语句
+  const { push, newline, runtimeModuleName } = context
+
+  if (ast.helpers.length) {
+    // 比如 ast.helpers 里面有个 [toDisplayString]
+    // 那么生成之后就是 import { toDisplayString as _toDisplayString } from "vue"
+    const code = `import {${ast.helpers
+      .map(s => `${helperNameMap[s]} as _${helperNameMap[s]}`)
+      .join(', ')} } from ${JSON.stringify(runtimeModuleName)}`
+
+    push(code)
   }
-}
 
-function genFunctionDecl(node: any, context: any) {
-  const { push, indent, deIndent } = context
-  push(`function ${node.id.name}`)
-  push('(')
-  genNodeList(node.params, context)
-  push(')')
-  push('{')
-  indent()
-  node.body.forEach(n => genNode(n, context))
-  deIndent()
-  push('}')
+  newline()
+  push('export ')
 }
-function genArrayExpression(node: any, context: any) {
-  const { push } = context
-  push('[')
-  genNodeList(node.elements, context)
-  push(']')
-}
-function genReturnStatement(node: any, context: any) {
-  const { push } = context
+function genFunctionPreamble(ast: any, context: any) {
+  const { runtimeGlobalName, push, newline } = context
+  const VueBinging = runtimeGlobalName
+
+  const aliasHelper = s => `${helperNameMap[s]} : _${helperNameMap[s]}`
+
+  if (ast.helpers.length > 0) {
+    push(
+      `
+const { ${ast.helpers.map(aliasHelper).join(', ')}} = ${VueBinging} 
+
+      `,
+    )
+  }
+
+  newline()
   push('return ')
-  genNode(node.return, context)
 }
-
 function genText(node: any, context: any) {
   const { push } = context
   push(`'${node.content}'`)
-}
-
-function genCallExpression(node: any, context: any) {
-  const { push } = context
-  const { callee, arguments: args } = node
-  push(`${callee.name}(`)
-  genNodeList(args, context)
-  push(')')
 }

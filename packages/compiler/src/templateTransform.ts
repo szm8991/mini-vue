@@ -1,8 +1,12 @@
+import { TO_DISPLAY_STRING } from './runtimeHelpers.js'
+
 interface TransformContext {
   currentNode: NodeType | null
   childIdx: number
   parent: NodeType | null
   nodeTransforms: Function[]
+  helpers?: Map<any, any>
+  helper?: Function
 }
 interface NodeType {
   type: string
@@ -10,6 +14,7 @@ interface NodeType {
   content?: string | undefined
   children?: NodeType[]
   jsNode?: any
+  helpers?: any[]
 }
 function traverseNode(ast: any, context: any) {
   const type = ast.type
@@ -27,6 +32,10 @@ function traverseNode(ast: any, context: any) {
       return
   }
   switch (type) {
+    case 'Interpolation':
+      // 插值的点，在于后续生成 render 代码的时候是获取变量的值
+      context.helper(TO_DISPLAY_STRING)
+      break
     case 'Root':
     case 'Element':
       traverseChildren(context)
@@ -83,5 +92,6 @@ export function templateTransform(ast: NodeType, options = {}) {
   const context: TransformContext = createTransformContext(ast, options)
   traverseNode(ast, context)
   createRootCodegen(ast, context)
+  ast.helpers!.push(...context.helpers!.keys())
   return ast
 }
