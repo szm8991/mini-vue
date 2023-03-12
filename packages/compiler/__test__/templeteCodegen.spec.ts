@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { templateCodegen } from '../src/templateCodegen'
 import { templateParse } from '../src/templateParse'
 import { templateTransform } from '../src/templateTransform'
-import { transformElement, transformExpression } from '../src/transforms'
+import { transformCompundExpression, transformElement, transformExpression } from '../src/transforms'
 describe('condegen', () => {
   it('Text', () => {
     const ast = templateParse('hi')
@@ -41,6 +41,21 @@ describe('condegen', () => {
       
             
       return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _createElementVNode('div')}"
+    `)
+  })
+  it('mixed', () => {
+    const ast = templateParse('<div>hi,{{msg}}</div>')
+    templateTransform(ast, {
+      nodeTransforms: [transformElement, transformExpression, transformCompundExpression],
+    })
+
+    const { code } = templateCodegen(ast)
+    expect(code).toMatchInlineSnapshot(`
+      "
+      const { toDisplayString : _toDisplayString, createElementVNode : _createElementVNode} = Vue 
+      
+            
+      return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _createElementVNode('div', null, 'hi,' + _toDisplayString(_ctx.msg))}"
     `)
   })
 })

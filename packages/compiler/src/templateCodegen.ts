@@ -33,15 +33,17 @@ function createCodegenContext(
 }
 export function templateCodegen(node: any, options = {}) {
   const context = createCodegenContext(node, options)
+  // const context = createCodegenContext(node, { mode: 'module' })
   const { push, mode } = context
 
+  // 导入所需的vue函数
   if (mode === 'module')
     genModulePreamble(node, context)
   else
     genFunctionPreamble(node, context)
 
+  // render函数的固定内容
   const functionName = 'render'
-
   const args = ['_ctx', '_cache', '$props', '$setup', '$data', '$options']
   const signature = args.join(', ')
   push(`function ${functionName}(${signature}) {`)
@@ -77,10 +79,30 @@ function genNode(node: any, context: any) {
     case 'Element':
       genElement(node, context)
       break
+    // function render(_ctx, _cache, $props, $setup, $data, $options) {
+    //   return (_openBlock(), _createElementBlock("div", null, "hi," + _toDisplayString(_ctx.msg), 1 /* TEXT */))
+    // }
+    case 'CompundExpression':
+      genCompoundExpression(node, context)
+      break
     default:
       genEmpty(node, context)
       break
   }
+}
+function genCompoundExpression(node: any, context: any) {
+  const { push } = context
+  for (let i = 0; i < node.children.length; i++) {
+    const child = node.children[i]
+    if (typeof child === 'string')
+      push(child)
+    else
+      genNode(child, context)
+  }
+}
+function genText(node: any, context: any) {
+  const { push } = context
+  push(`'${node.content}'`)
 }
 function genElement(node, context) {
   const { push, helper } = context
@@ -93,15 +115,6 @@ function genElement(node, context) {
   push(')')
 }
 function genNodeList(nodes: any, context: any) {
-  function genNodeList(nodes, context) {
-    const { push } = context
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i]
-      genNode(node, context)
-      if (i < nodes.length - 1)
-        push(', ')
-    }
-  }
   const { push } = context
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]
@@ -118,13 +131,10 @@ function genNullableArgs(args) {
   // vue3源码中，后面可能会包含 patchFlag、dynamicProps 等编译优化的信息
   // 而这些信息有可能是不存在的，所以在这边的时候需要删除掉
   let i = args.length
-  // 这里 i-- 用的还是特别的巧妙的
-  // 当为0 的时候自然就退出循环了
   while (i--) {
     if (args[i] != null)
       break
   }
-  // 把为 falsy 的值都替换成 "null"
   return args.slice(0, i + 1).map(arg => arg || 'null')
 }
 function genInterpolation(node: any, context: any) {
@@ -174,8 +184,4 @@ const { ${ast.helpers.map(aliasHelper).join(', ')}} = ${VueBinging}
 
   newline()
   push('return ')
-}
-function genText(node: any, context: any) {
-  const { push } = context
-  push(`'${node.content}'`)
 }
