@@ -12,6 +12,7 @@ interface NodeType {
   jsNode?: any
 }
 function traverseNode(ast: any, context: any) {
+  const type = ast.type
   context.currentNode = ast
   // exit stage callback functions
   const exitFns: Function[] = []
@@ -25,8 +26,14 @@ function traverseNode(ast: any, context: any) {
     if (!context.currentNode)
       return
   }
-  // 递归处理子节点
-  traverseChildren(context)
+  switch (type) {
+    case 'Root':
+    case 'Element':
+      traverseChildren(context)
+      break
+    default:
+      break
+  }
   let i = exitFns.length
   while (i--)
     exitFns[i]()
@@ -48,12 +55,33 @@ function createTransformContext(root, options): TransformContext {
     childIdx: 0,
     parent: null,
     nodeTransforms: options.nodeTransforms || [],
+    helpers: new Map(),
+    helper(name) {
+      // helpers 数据会在后续生成代码的时候用到
+      const count = context.helpers.get(name) || 0
+      context.helpers.set(name, count + 1)
+    },
   }
 
   return context
 }
+function createRootCodegen(root: any, context: any) {
+  const { children } = root
 
+  const child = children[0]
+
+  // codegenNode 的目的是专门为了 codegen 准备的  为的就是和 ast 的 node 分离开
+  if (child.type === 'Element' && child.codegenNode) {
+    const codegenNode = child.codegenNode
+    root.codegenNode = codegenNode
+  }
+  else {
+    root.codegenNode = child
+  }
+}
 export function templateTransform(ast: NodeType, options = {}) {
   const context: TransformContext = createTransformContext(ast, options)
   traverseNode(ast, context)
+  createRootCodegen(ast, context)
+  return ast
 }

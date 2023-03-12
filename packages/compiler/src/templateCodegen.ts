@@ -1,3 +1,5 @@
+import { TO_DISPLAY_STRING, helperNameMap } from './runtimeHelpers.js'
+
 function createCodegenContext(
   ast: any,
   { runtimeModuleName = 'vue', runtimeGlobalName = 'Vue', mode = 'function' },
@@ -7,6 +9,9 @@ function createCodegenContext(
     mode,
     runtimeModuleName,
     runtimeGlobalName,
+    helper(key) {
+      return `_${helperNameMap[key]}`
+    },
     push(code) {
       context.code += code
     },
@@ -58,13 +63,29 @@ function genNode(node: any, context: any) {
     case 'Text':
       genText(node, context)
       break
-
+    // function render(_ctx, _cache, $props, $setup, $data, $options) {
+    //   return _toDisplayString(_ctx.message)
+    // }
+    case 'Interpolation':
+      genInterpolation(node, context)
+      break
+    case 'Expression':
+      genExpression(node, context)
+      break
     default:
       genEmpty(node, context)
       break
   }
 }
-
+function genInterpolation(node: any, context: any) {
+  const { push, helper } = context
+  push(`${helper(TO_DISPLAY_STRING)}(`)
+  genNode(node.content, context)
+  push(')')
+}
+function genExpression(node: any, context: any) {
+  context.push(node.content, node)
+}
 function genEmpty(_, context) {
   const { push } = context
   push('{}')

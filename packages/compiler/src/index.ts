@@ -14,3 +14,4 @@ export * from './tokenzie.js'
 baseCompile('<div><p>Vue</p><p>Template</p></div>')
 templateTransform(templateParse('<div>hello {{ world }}</div>'))
 templateCodegen(templateTransform(templateParse('hi')))
+templateCodegen(templateTransform(templateParse('{{message}}')))
