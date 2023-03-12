@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { templateCodegen } from '../src/templateCodegen'
 import { templateParse } from '../src/templateParse'
 import { templateTransform } from '../src/templateTransform'
-import { transformExpression } from '../src/transforms'
+import { transformElement, transformExpression } from '../src/transforms'
 describe('condegen', () => {
   it('Text', () => {
     const ast = templateParse('hi')
@@ -26,6 +26,21 @@ describe('condegen', () => {
       
             
       return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _toDisplayString(_ctx.hello)}"
+    `)
+  })
+  it('Element', () => {
+    const ast = templateParse('<div></div>')
+    templateTransform(ast, {
+      nodeTransforms: [transformElement],
+    })
+
+    const { code } = templateCodegen(ast)
+    expect(code).toMatchInlineSnapshot(`
+      "
+      const { createElementVNode : _createElementVNode} = Vue 
+      
+            
+      return function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {return _createElementVNode('div')}"
     `)
   })
 })
